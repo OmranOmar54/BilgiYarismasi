@@ -11,17 +11,19 @@ public class AnaMenu : MonoBehaviour
     private bool hakkindaAcikMi = false;
 
     public  TMP_InputField kullaniciAdiAlani;
-    string kullaniciID;
+    string kullaniciAdi;
     string kullaniciIP;
     public GameObject IDHatasi;
+
+    public TextMeshProUGUI _cache;
 
     public void OyunaBasla()
     {
         if(kullaniciAdiAlani.text.ToString() != "")
         {
-            SceneManager.LoadScene("Oyun");
             StartCoroutine(GetIP());
-            kullaniciID = kullaniciAdiAlani.text.ToString();
+            kullaniciAdi = kullaniciAdiAlani.text.ToString();
+            SceneManager.LoadScene("Oyun");
         }
         else
         {
@@ -50,7 +52,7 @@ public class AnaMenu : MonoBehaviour
 
     IEnumerator GetIP()
     {   
-        UnityWebRequest istek = UnityWebRequest.Get("http://bilgiyarismasi.free.nf/get_ip.php?i=1");
+        UnityWebRequest istek = UnityWebRequest.Get("https://56a30e7c-bab9-4575-8b12-cce221eb12bd-00-2q7avn8nejj9u.pike.replit.dev/");
         yield return istek.SendWebRequest();
 
         if(istek.result == UnityWebRequest.Result.Success)
