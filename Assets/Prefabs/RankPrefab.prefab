@@ -32,10 +32,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1582490755031330440}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.022462374, y: 0.18}
-  m_AnchorMax: {x: 0.10953763, y: 0.84685284}
-  m_AnchoredPosition: {x: -0.7999878, y: -1}
-  m_SizeDelta: {x: -1.1356964, y: 0}
+  m_AnchorMin: {x: 0.023000002, y: 0.17965746}
+  m_AnchorMax: {x: 0.10684958, y: 0.82848626}
+  m_AnchoredPosition: {x: 0.70007324, y: 0}
+  m_SizeDelta: {x: 1.8643188, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8862482250257914190
 CanvasRenderer:
@@ -96,7 +96,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 50
+  m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
@@ -146,6 +146,7 @@ GameObject:
   - component: {fileID: 576256034633321960}
   - component: {fileID: 6285873790698013609}
   - component: {fileID: 1132070777314735196}
+  - component: {fileID: 7754066070923428193}
   m_Layer: 5
   m_Name: RankPrefab
   m_TagString: Untagged
@@ -170,10 +171,10 @@ RectTransform:
   - {fileID: 5298629219217405325}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.023222223, y: 0.88400006}
+  m_AnchorMin: {x: 0.028, y: 0.8838958}
   m_AnchorMax: {x: 0.9710001, y: 0.9480001}
-  m_AnchoredPosition: {x: 2.5, y: -0.25}
-  m_SizeDelta: {x: -4.9999695, y: -0.5000038}
+  m_AnchoredPosition: {x: 0.00012207031, y: -0.25}
+  m_SizeDelta: {x: 0.000030517578, y: -0.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &576256034633321960
 CanvasRenderer:
@@ -230,9 +231,32 @@ MonoBehaviour:
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: 50
-  m_FlexibleWidth: -1
+  m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!223 &7754066070923428193
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6271301253945267557}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &6940817735769451739
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,6 +268,7 @@ GameObject:
   - component: {fileID: 8047972610463252775}
   - component: {fileID: 8501926211870449800}
   - component: {fileID: 6585329062195240662}
+  - component: {fileID: 3036871759173989587}
   m_Layer: 5
   m_Name: KullaniciAdi
   m_TagString: Untagged
@@ -265,10 +290,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1582490755031330440}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.14646238, y: 0.18}
-  m_AnchorMax: {x: 0.71037626, y: 0.84685284}
-  m_AnchoredPosition: {x: -0.5, y: -1}
-  m_SizeDelta: {x: 0.68829346, y: 0}
+  m_AnchorMin: {x: 0.14710087, y: 0.17965746}
+  m_AnchorMax: {x: 0.68600005, y: 0.82848626}
+  m_AnchoredPosition: {x: -1.3220825, y: 0}
+  m_SizeDelta: {x: -0.95584106, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8501926211870449800
 CanvasRenderer:
@@ -329,7 +354,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 50
+  m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
@@ -367,6 +392,29 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!223 &3036871759173989587
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6940817735769451739}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &7208343845740516079
 GameObject:
   m_ObjectHideFlags: 0
@@ -399,10 +447,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1582490755031330440}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.71037626, y: 0.18}
-  m_AnchorMax: {x: 0.96900004, y: 0.84685284}
-  m_AnchoredPosition: {x: -14.75, y: -1}
-  m_SizeDelta: {x: 32, y: 0}
+  m_AnchorMin: {x: 0.70366657, y: 0.17965746}
+  m_AnchorMax: {x: 0.970556, y: 0.82848626}
+  m_AnchoredPosition: {x: -12.25, y: 0}
+  m_SizeDelta: {x: 23, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4225920835193547469
 CanvasRenderer:
@@ -459,11 +507,11 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 63.2
+  m_fontSize: 63.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 50
+  m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 4
