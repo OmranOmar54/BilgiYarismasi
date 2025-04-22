@@ -27,9 +27,9 @@ public class AnaMenu : MonoBehaviour
 
     public void OyunaBasla()
     {
-        kullaniciAdi = kullaniciAdiAlani.text; // .ToString() gereksiz
+        kullaniciAdi = kullaniciAdiAlani.text;
 
-        if (!string.IsNullOrEmpty(kullaniciAdi)) // Boş veya null kontrolü
+        if (!string.IsNullOrEmpty(kullaniciAdi))
         {
             IDHatasi.SetActive(false); // Hata mesajını gizle (varsa)
             StartCoroutine(GetIPAndProceed()); // IP al ve devam et
@@ -42,7 +42,6 @@ public class AnaMenu : MonoBehaviour
 
     IEnumerator GetIPAndProceed()
     {
-        // IP Adresini Al (ipify.org kullanarak)
         UnityWebRequest ipRequest = UnityWebRequest.Get("https://api.ipify.org");
         yield return ipRequest.SendWebRequest();
 
@@ -51,11 +50,6 @@ public class AnaMenu : MonoBehaviour
             kullaniciIP = ipRequest.downloadHandler.text;
             Debug.Log("Kullanıcının IP Adresi: " + kullaniciIP);
 
-            // --- ÖNEMLİ NOT ---
-            // Mevcut mantıkla, oyuna her başlandığında 100 puan gönderiliyor.
-            // Normalde skorun oyun SONUNDA gönderilmesi gerekir.
-            // Bu SendScore çağrısını oyun sonuna taşıyıp gerçek skoru göndermelisin.
-            // Şimdilik isteğin üzerine burada bırakıyorum:
             int placeholderScore = 100; // Şimdilik sabit bir skor
             StartCoroutine(SendScoreToServer(kullaniciAdi, kullaniciIP, placeholderScore));
             // --- Bitiş ÖNEMLİ NOT ---
@@ -68,7 +62,7 @@ public class AnaMenu : MonoBehaviour
             Debug.LogError("IP Alınamadı: " + ipRequest.error);
             // İsteğe bağlı: Kullanıcıya IP alınamadığına dair bir mesaj gösterebilirsin
             // Örneğin: IDHatasi.GetComponentInChildren<TextMeshProUGUI>().text = "IP Adresi Alınamadı!";
-            // IDHatasi.SetActive(true);
+            IDHatasi.SetActive(true);
         }
 
         // Kullanılmayan istek nesnesini temizle
