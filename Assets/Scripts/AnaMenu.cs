@@ -22,9 +22,6 @@ public class AnaMenu : MonoBehaviour
         if(kullaniciAdiAlani.text.ToString() != "")
         {
             StartCoroutine(GetIP());
-            kullaniciAdi = kullaniciAdiAlani.text.ToString();
-            SceneManager.LoadScene("Oyun");
-            StartCoroutine(Gonder(kullaniciAdi, kullaniciIP, 100));
 
         }
         else
@@ -55,7 +52,7 @@ public class AnaMenu : MonoBehaviour
 
     IEnumerator GetIP()
     {   
-        UnityWebRequest istek = UnityWebRequest.Get("https://56a30e7c-bab9-4575-8b12-cce221eb12bd-00-2q7avn8nejj9u.pike.replit.dev/");
+        UnityWebRequest istek = UnityWebRequest.Get("https://api.ipify.org");
         yield return istek.SendWebRequest();
 
         if(istek.result == UnityWebRequest.Result.Success)
@@ -63,6 +60,10 @@ public class AnaMenu : MonoBehaviour
             string ip = istek.downloadHandler.text;
             Debug.Log("Kullanıcının IP Adresi: "+ ip);
             kullaniciIP = ip;
+            kullaniciAdi = kullaniciAdiAlani.text.ToString();
+            StartCoroutine(Gonder(kullaniciAdi, kullaniciIP, 100f));
+            SceneManager.LoadScene("Oyun");
+
         }
         else
         {
@@ -70,14 +71,14 @@ public class AnaMenu : MonoBehaviour
         }
     }
 
-    IEnumerator Gonder(string kullaniciAdi, string ip, float puan)
+    IEnumerator Gonder(string kullaniciadi, string ip, float puan)
     {
         WWWForm form = new WWWForm();
-        form.AddField("kullaniciAdi", kullaniciAdi);
+        form.AddField("kullaniciAdi", kullaniciadi);
         form.AddField("ip", ip);
         form.AddField("puan", puan.ToString());
 
-        UnityWebRequest www = UnityWebRequest.Post("https://seninsiten.infinityfreeapp.com/insert.php", form);
+        UnityWebRequest www = UnityWebRequest.Post("https://73410697-51b4-486e-950f-2066c2e7d5a6-00-3jr6dh4q26quw.sisko.replit.dev", form);
         yield return www.SendWebRequest();
 
         if (www.result != UnityWebRequest.Result.Success)
