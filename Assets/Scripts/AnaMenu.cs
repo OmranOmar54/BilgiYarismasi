@@ -17,7 +17,7 @@ public class AnaMenu : MonoBehaviour
 
     public TextMeshProUGUI _cache;
 
-    private string apiUrl ="https://327eb718-351c-489b-9456-dab47851ab47-00-3st11zvtfmg0m.sisko.replit.dev/"
+    private string apiUrl ="https://327eb718-351c-489b-9456-dab47851ab47-00-3st11zvtfmg0m.sisko.replit.dev/";
 
     public void OyunaBasla()
     {
