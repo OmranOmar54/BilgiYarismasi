@@ -27,6 +27,7 @@ public class AnaMenu : MonoBehaviour
 
     public void OyunaBasla()
     {
+        Debug.Log("OyunaBasla çağrıldı.");
         kullaniciAdi = kullaniciAdiAlani.text;
 
         if (!string.IsNullOrEmpty(kullaniciAdi))
@@ -42,8 +43,11 @@ public class AnaMenu : MonoBehaviour
 
     IEnumerator GetIPAndProceed()
     {
+        Debug.Log("GetIPAndProceed başladı.");
         UnityWebRequest ipRequest = UnityWebRequest.Get("https://api.ipify.org");
+        Debug.Log("IP isteği gönderiliyor...");
         yield return ipRequest.SendWebRequest();
+        Debug.Log("IP isteği tamamlandı. Sonuç: " + ipRequest.result);
 
         if (ipRequest.result == UnityWebRequest.Result.Success)
         {
@@ -54,8 +58,8 @@ public class AnaMenu : MonoBehaviour
             StartCoroutine(SendScoreToServer(kullaniciAdi, kullaniciIP, placeholderScore));
             // --- Bitiş ÖNEMLİ NOT ---
 
-            // Skor gönderildikten sonra (veya gönderim başlatıldıktan sonra) diğer sahneye geç
-            SceneManager.LoadScene("Oyun");
+            
+            //SceneManager.LoadScene("Oyun");
         }
         else
         {
