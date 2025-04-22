@@ -24,11 +24,14 @@ public class AnaMenu : MonoBehaviour
             StartCoroutine(GetIP());
             kullaniciAdi = kullaniciAdiAlani.text.ToString();
             SceneManager.LoadScene("Oyun");
+            StartCoroutine(Gonder(kullaniciAdi, kullaniciIP, 100));
+
         }
         else
         {
             IDHatasi.SetActive(true);
         }
+
     }
 
     public void Hakkinda()
@@ -64,6 +67,26 @@ public class AnaMenu : MonoBehaviour
         else
         {
             Debug.LogError("IP Alınamadı: " + istek.error);
+        }
+    }
+
+    IEnumerator Gonder(string kullaniciAdi, string ip, float puan)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("kullaniciAdi", kullaniciAdi);
+        form.AddField("ip", ip);
+        form.AddField("puan", puan.ToString());
+
+        UnityWebRequest www = UnityWebRequest.Post("https://seninsiten.infinityfreeapp.com/insert.php", form);
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Hata: " + www.error);
+        }
+        else
+        {
+            Debug.Log("Sunucu cevabı: " + www.downloadHandler.text);
         }
     }
 }
