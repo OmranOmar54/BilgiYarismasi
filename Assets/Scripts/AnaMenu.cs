@@ -21,7 +21,7 @@ public class AnaMenu : MonoBehaviour
     // Replit API'nizin tam URL'si (endpoint dahil)
     // Senin Gonder metodundaki URL'yi baz aldım ve /add_score ekledim.
     // Eğer Python scriptindeki endpoint farklıysa burayı güncellemelisin.
-    private string apiUrl = "https://73410697-51b4-486e-950f-2066c2e7d5a6-00-3jr6dh4q26quw.sisko.replit.dev/add_score";
+    private string apiUrl = "https://bilgiyarismasi-api.omranomar98700.repl.co/add_score";
 
     // --- Oyuna Başlama ve Kullanıcı Bilgisi Alma ---
 
