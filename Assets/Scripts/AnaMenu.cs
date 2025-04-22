@@ -1,27 +1,33 @@
 using System.Collections;
+using System.Text; // JSON için Encoding
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.Networking;
+using UnityEngine.Networking; // UnityWebRequest için gerekli
 
 public class AnaMenu : MonoBehaviour
 {
     public GameObject hakkindaMenusu;
     private bool hakkindaAcikMi = false;
 
-    public  TMP_InputField kullaniciAdiAlani;
+    public TMP_InputField kullaniciAdiAlani;
     string kullaniciAdi;
     string kullaniciIP;
     public GameObject IDHatasi;
 
-    public TextMeshProUGUI _cache;
+    public TextMeshProUGUI _cache; // Bu değişkenin ne için kullanıldığına dair yorum eklemek faydalı olabilir
 
-    private string apiUrl ="https://327eb718-351c-489b-9456-dab47851ab47-00-3st11zvtfmg0m.sisko.replit.dev/";
+    // Replit API'nizin tam URL'si (endpoint dahil)
+    // Senin Gonder metodundaki URL'yi baz aldım ve /add_score ekledim.
+    // Eğer Python scriptindeki endpoint farklıysa burayı güncellemelisin.
+    private string apiUrl = "https://73410697-51b4-486e-950f-2066c2e7d5a6-00-3jr6dh4q26quw.sisko.replit.dev/add_score";
+
+    // --- Oyuna Başlama ve Kullanıcı Bilgisi Alma ---
 
     public void OyunaBasla()
     {
-        kullaniciAdi = kullaniciAdiAlani.text;
+        kullaniciAdi = kullaniciAdiAlani.text; // .ToString() gereksiz
 
         if (!string.IsNullOrEmpty(kullaniciAdi)) // Boş veya null kontrolü
         {
@@ -32,50 +38,46 @@ public class AnaMenu : MonoBehaviour
         {
             IDHatasi.SetActive(true); // Kullanıcı adı boşsa hata göster
         }
-
     }
 
-    public void Hakkinda()
+    IEnumerator GetIPAndProceed()
     {
-        if(hakkindaAcikMi == false)
-        {
-            hakkindaMenusu.SetActive(true);
-            hakkindaAcikMi = true;
-        }
-        else
-        {
-            hakkindaMenusu.SetActive(false);
-            hakkindaAcikMi = false;
-        }
-    }
+        // IP Adresini Al (ipify.org kullanarak)
+        UnityWebRequest ipRequest = UnityWebRequest.Get("https://api.ipify.org");
+        yield return ipRequest.SendWebRequest();
 
-    public void HataKapat()
-    {
-        IDHatasi.SetActive(false);
-    }
-
-    IEnumerator GetIP()
-    {   
-        UnityWebRequest istek = UnityWebRequest.Get("https://api.ipify.org");
-        yield return istek.SendWebRequest();
-
-        if(istek.result == UnityWebRequest.Result.Success)
+        if (ipRequest.result == UnityWebRequest.Result.Success)
         {
-            string ip = istek.downloadHandler.text;
-            Debug.Log("Kullanıcının IP Adresi: "+ ip);
-            kullaniciIP = ip;
-            kullaniciAdi = kullaniciAdiAlani.text.ToString();
-            StartCoroutine(Gonder(kullaniciAdi, kullaniciIP, 100f));
+            kullaniciIP = ipRequest.downloadHandler.text;
+            Debug.Log("Kullanıcının IP Adresi: " + kullaniciIP);
+
+            // --- ÖNEMLİ NOT ---
+            // Mevcut mantıkla, oyuna her başlandığında 100 puan gönderiliyor.
+            // Normalde skorun oyun SONUNDA gönderilmesi gerekir.
+            // Bu SendScore çağrısını oyun sonuna taşıyıp gerçek skoru göndermelisin.
+            // Şimdilik isteğin üzerine burada bırakıyorum:
+            int placeholderScore = 100; // Şimdilik sabit bir skor
+            StartCoroutine(SendScoreToServer(kullaniciAdi, kullaniciIP, placeholderScore));
+            // --- Bitiş ÖNEMLİ NOT ---
+
+            // Skor gönderildikten sonra (veya gönderim başlatıldıktan sonra) diğer sahneye geç
             SceneManager.LoadScene("Oyun");
-
         }
         else
         {
-            Debug.LogError("IP Alınamadı: " + istek.error);
+            Debug.LogError("IP Alınamadı: " + ipRequest.error);
+            // İsteğe bağlı: Kullanıcıya IP alınamadığına dair bir mesaj gösterebilirsin
+            // Örneğin: IDHatasi.GetComponentInChildren<TextMeshProUGUI>().text = "IP Adresi Alınamadı!";
+            // IDHatasi.SetActive(true);
         }
-        istek.Dispose();
+
+        // Kullanılmayan istek nesnesini temizle
+        ipRequest.Dispose();
     }
 
+    // --- Skor Gönderme ---
+
+    // JSON'a çevirmek için yardımcı bir sınıf (Python scriptinin beklediği alan adlarıyla)
     [System.Serializable] // JsonUtility'nin bu sınıfı işlemesi için gerekli
     private class ScoreData
     {
@@ -139,23 +141,23 @@ public class AnaMenu : MonoBehaviour
     }
 
 
-    /*IEnumerator Gonder(string kullaniciadi, string ip, float puan)
+    // --- Diğer Menü Fonksiyonları ---
+
+    public void Hakkinda()
     {
-        WWWForm form = new WWWForm();
-        form.AddField("kullaniciAdi", kullaniciadi);
-        form.AddField("ip", ip);
-        form.AddField("puan", puan.ToString());
+        hakkindaAcikMi = !hakkindaAcikMi; // Daha kısa toggle yöntemi
+        hakkindaMenusu.SetActive(hakkindaAcikMi);
+    }
 
-        UnityWebRequest www = UnityWebRequest.Post("https://73410697-51b4-486e-950f-2066c2e7d5a6-00-3jr6dh4q26quw.sisko.replit.dev", form);
-        yield return www.SendWebRequest();
+    public void HataKapat()
+    {
+        IDHatasi.SetActive(false);
+    }
 
-        if (www.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError("Hata: " + www.error);
-        }
-        else
-        {
-            Debug.Log("Sunucu cevabı: " + www.downloadHandler.text);
-        }
-    }*/
+    // --- Oyun Çıkış ---
+    public void Cikis()
+    {
+        Application.Quit();
+        Debug.Log("Oyundan Çıkıldı"); // Editörde test için
+    }
 }
