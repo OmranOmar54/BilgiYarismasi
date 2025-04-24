@@ -333,7 +333,7 @@ public class AnaMenu : MonoBehaviour
 
     void KeyboardOn(){
         if(kullaniciAdiAlani != null){
-            klavye = TouchScreenKeyboard.Open("", TouchScreenKeyboard.Default, false, false, false, false);
+            keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboard.Default, false, false, false, false);
         }
         else{
             Debug.LogError("Herhangi bir inputfield atanmamış");
@@ -341,9 +341,9 @@ public class AnaMenu : MonoBehaviour
     }
 
     void KeyboardOff(){
-        if(klavye != null){
-            klavye.active = false;
-            klavye = null;
+        if(keyboard != null){
+            keyboard.active = false;
+            keyboard = null;
         }
     }
 }
