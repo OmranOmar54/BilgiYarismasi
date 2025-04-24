@@ -332,6 +332,6 @@ public class AnaMenu : MonoBehaviour
     }
 
     void onTouchInput(){
-        keyboard = new TouchScreenKeyboard.visible;
+        keyboard = new TouchScreenKeyboard.visible();
     }
 }
