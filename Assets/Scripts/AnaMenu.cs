@@ -13,7 +13,6 @@ public class AnaMenu : MonoBehaviour
     private bool hakkindaAcikMi = false;
 
     public TMP_InputField kullaniciAdiAlani;
-    private TouchScreenKeyboard keyboard;
     string kullaniciAdi;
     string kullaniciIP;
     public GameObject IDHatasi;
@@ -329,25 +328,5 @@ public class AnaMenu : MonoBehaviour
 
         // VEYA başlangıçta otomatik yüklemek için:
         RequestLeaderboardData();
-    }
-
-    public void OnClickedToInput(PointerEventData eventData){
-        if(keyboard == null || !TouchScreenKeyboard.visible){
-            keyboard = TouchScreenKeyboard.Open(kullaniciAdiAlani.text, TouchScreenKeyboardType.Default, true, false, false, false, kullaniciAdiAlani.placeholder.GetComponent<TMP_Text>().text);
-        }
-
-    }
-
-      void Update()
-    {
-        if(keyboard != null){
-            if(keyboard.status == TouchScreenKeyboard.Status.Done){
-                kullaniciAdiAlani.text = keyboard.text;
-                keyboard = null;
-            }
-            else if(keyboard.status == TouchScreenKeyboard.Status.Canceled){
-                keyboard = null;
-            }
-        }
     }
 }
