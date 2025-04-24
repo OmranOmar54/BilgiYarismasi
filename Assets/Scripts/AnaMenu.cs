@@ -331,7 +331,19 @@ public class AnaMenu : MonoBehaviour
         RequestLeaderboardData();
     }
 
-    void onTouchInput(){
-        keyboard = new TouchScreenKeyboard.visible();
+    void KeyboardOn(){
+        if(kullaniciAdiAlani != null){
+            klavye = TouchScreenKeyboard.Open("", TouchScreenKeyboard.Default, false false, false, false);
+        }
+        else{
+            Debug.LogError("Herhangi bir inputfield atanmamış");
+        }
+    }
+
+    void KeyboardOff(){
+        if(klavye != null){
+            klavye.active = false;
+            klavye = null;
+        }
     }
 }
