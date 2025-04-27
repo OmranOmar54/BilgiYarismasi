@@ -3,7 +3,33 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - m
+  - c
+  - z
+  - x
+  - v
+  - b
+  - n
+  - j
+  - s
+  - f
+  - l
+  - k
+  - d
+  - a
+  - h
+  - g
+  - o
+  - q
+  - w
+  - e
+  - u
+  - t
+  - i
+  - p
+  - y
+  - r
   layers:
   - Default
   - TransparentFX
