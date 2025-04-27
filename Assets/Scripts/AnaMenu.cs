@@ -1,48 +1,47 @@
 using System.Collections;
-using System.Text; // JSON için Encoding
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Networking;
-using UnityEngine.EventSystems; // UnityWebRequest için gerekli
+using UnityEngine.EventSystems;
 
 public class AnaMenu : MonoBehaviour
 {
     public GameObject hakkindaMenusu;
     private bool hakkindaAcikMi = false;
-    public TextMeshProUGUI kullaniciAdiAlani;
+    public TextMeshProUGUI kullaniciAdiAlani; 
     string kullaniciAdi;
     string kullaniciIP;
+    int kullaniciScore;
     public GameObject IDHatasi;
     public GameObject leaderboardEntryPrefab;
     public Transform leaderboardContentPanel;
     public TextMeshProUGUI leaderboardStatusText;
-
     public GameObject klavye;
+    private string apiUrl = "https://bilgiyarismasi-api.onrender.com";
 
-    private string apiUrl = "https://327eb718-351c-489b-9456-dab47851ab47-00-3st11zvtfmg0m.sisko.replit.dev";
-
-    public void OyunaBasla()
+    public void OyunaBasla() //Oyuna basla butonunda cagirilacak script
     {
-        Debug.Log("OyunaBasla çağrıldı.");
-        kullaniciAdi = kullaniciAdiAlani.text;
+        kullaniciAdi = kullaniciAdiAlani.text; //kullanici adi textini aliyor
 
-        if (!string.IsNullOrEmpty(kullaniciAdi))
+        if (!string.IsNullOrEmpty(kullaniciAdi)) //kullanici adi bos degil ise
         {
-            IDHatasi.SetActive(false);
-            StartCoroutine(GetIPAndProceed());
+            IDHatasi.SetActive(false); 
+            StartCoroutine(GetIPAndProceed());//ip toplama surecini baslat
         }
-        else
+
+        else//kullanici adi bos ise
         {
             IDHatasi.SetActive(true);
         }
     }
 
-    IEnumerator GetIPAndProceed()
+    IEnumerator GetIPAndProceed()//kullanicinin bilgilerini topla
     {
         Debug.Log("GetIPAndProceed başladı.");
-        UnityWebRequest ipRequest = UnityWebRequest.Get("https://api.ipify.org");
+        UnityWebRequest ipRequest = UnityWebRequest.Get("https://api.ipify.org");//ip alma api'si
         Debug.Log("IP isteği gönderiliyor...");
         yield return ipRequest.SendWebRequest();
         Debug.Log("IP isteği tamamlandı. Sonuç: " + ipRequest.result);
@@ -52,19 +51,22 @@ public class AnaMenu : MonoBehaviour
             kullaniciIP = ipRequest.downloadHandler.text;
             Debug.Log("Kullanıcının IP Adresi: " + kullaniciIP);
 
-            int placeholderScore = 100; 
-            StartCoroutine(SendScoreToServer(kullaniciAdi, kullaniciIP, placeholderScore));
+            kullaniciScore = 100;
+            StartCoroutine(SendScoreToServer(kullaniciAdi, kullaniciIP, kullaniciScore));//kullanici verilerini database'e gonderme islemini baslat
+        
         }
+
         else
         {
             Debug.LogError("IP Alınamadı: " + ipRequest.error);
             IDHatasi.SetActive(true);
         }
+
         ipRequest.Dispose();
     }
 
     [System.Serializable]
-    private class ScoreData
+    private class ScoreData//yeni data turu tanimlama
     {
         public string username;
         public string ip;
@@ -80,21 +82,21 @@ public class AnaMenu : MonoBehaviour
             score = scoreValue
         };
 
-        string jsonData = JsonUtility.ToJson(dataToSend);
-        byte[] jsonToSendBytes = new UTF8Encoding().GetBytes(jsonData);
+        string jsonData = JsonUtility.ToJson(dataToSend);//datayi json fomatina donusturme
+        byte[] jsonToSendBytes = new UTF8Encoding().GetBytes(jsonData);//json dosyasini uygun forma getirme
 
-        string addScoreUrl = apiUrl + "/add_score";
+        string addScoreUrl = apiUrl + "/add_score";//datayi api'nin ilgili alt basligina yonlendirme
 
         using (UnityWebRequest request = new UnityWebRequest(addScoreUrl, "POST"))
         {
-            request.uploadHandler = new UploadHandlerRaw(jsonToSendBytes);
-            request.downloadHandler = new DownloadHandlerBuffer();
+            request.uploadHandler = new UploadHandlerRaw(jsonToSendBytes);//veriyi gonderme
+            request.downloadHandler = new DownloadHandlerBuffer();//gelen veriyi takip etme
 
             request.SetRequestHeader("Content-Type", "application/json");
 
             yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)//gelen veri hata mesaji ise
             {
                 Debug.LogError($"API Gönderme Hatası ({addScoreUrl}): {request.error}");
                 if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
@@ -102,7 +104,7 @@ public class AnaMenu : MonoBehaviour
                     Debug.LogError("Sunucu Hata Yanıtı: " + request.downloadHandler.text);
                 }
             }
-            else
+            else//hata mesaji degil ise
             {
                 Debug.Log("Skor başarıyla gönderildi!");
                 SceneManager.LoadScene("Oyun");
@@ -114,26 +116,26 @@ public class AnaMenu : MonoBehaviour
         }
     }
 
-    public void Hakkinda()
+    public void Hakkinda()//hakkinda tusu
     {
         hakkindaAcikMi = !hakkindaAcikMi;
         hakkindaMenusu.SetActive(hakkindaAcikMi);
     }
 
-    public void HataKapat()
+    public void HataKapat()//id hatasi kapatma tusu
     {
         IDHatasi.SetActive(false);
     }
 
      [System.Serializable]
-    public class LeaderboardEntry
+    public class LeaderboardEntry//yeni data turu tanimliyoruz
     {
         public int rank;
         public string username;
         public int score;
     }
 
-    public static class JsonHelper
+    public static class JsonHelper//json dosyayi stringe cevirme
     {
         public static T[] FromJson<T>(string json)
         {
@@ -151,12 +153,12 @@ public class AnaMenu : MonoBehaviour
 
       public void RequestLeaderboardData()
     {
-        StartCoroutine(FetchLeaderboardDataCoroutine());
+        StartCoroutine(FetchLeaderboardDataCoroutine());//databaseden datayi isteme islemi
     }
 
     IEnumerator FetchLeaderboardDataCoroutine()
     {
-        ClearLeaderboardUI();
+        ClearLeaderboardUI();//liderlik tablosu dolu ise temizle
         if (leaderboardStatusText != null) leaderboardStatusText.text = "Yükleniyor...";
 
         string fullUrl = apiUrl + "/get_leaderboard";
@@ -166,7 +168,7 @@ public class AnaMenu : MonoBehaviour
         {
             yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)//gelen data hata iceriyorsa
             {
                 Debug.LogError($"API Okuma Hatası ({fullUrl}): {request.error}");
                 if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
@@ -175,7 +177,7 @@ public class AnaMenu : MonoBehaviour
                 }
                 if (leaderboardStatusText != null) leaderboardStatusText.text = "Liderlik Tablosu yüklenemedi!\n(Hata: " + request.error + ")";
             }
-            else if (request.result == UnityWebRequest.Result.Success)
+            else if (request.result == UnityWebRequest.Result.Success)//hata icermiyorsa
             {
                 Debug.Log("Liderlik tablosu başarıyla alındı!");
                 string jsonResponse = request.downloadHandler.text;
@@ -183,14 +185,14 @@ public class AnaMenu : MonoBehaviour
 
                 if (leaderboardStatusText != null) leaderboardStatusText.text = "";
 
-                ProcessLeaderboardJson(jsonResponse);
+                ProcessLeaderboardJson(jsonResponse);//gelen datayi isleme sureci
             }
         }
     }
 
     void ProcessLeaderboardJson(string json)
     {
-        if (string.IsNullOrEmpty(json))
+        if (string.IsNullOrEmpty(json))//json verisi bos mu
         {
             Debug.LogError("Alınan JSON verisi boş.");
             if (leaderboardStatusText != null) leaderboardStatusText.text = "Liderlik tablosu boş veya alınamadı.";
@@ -217,7 +219,7 @@ public class AnaMenu : MonoBehaviour
 
             foreach (var entry in entries)
             {
-                GameObject entryGO = Instantiate(leaderboardEntryPrefab, leaderboardContentPanel);
+                GameObject entryGO = Instantiate(leaderboardEntryPrefab, leaderboardContentPanel);//gelen verilere gore prefab ekleme
 
                 TextMeshProUGUI rankText = entryGO.transform.Find("Rank")?.GetComponent<TextMeshProUGUI>();
                 TextMeshProUGUI nameText = entryGO.transform.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
@@ -226,21 +228,27 @@ public class AnaMenu : MonoBehaviour
                 if (rankText != null)
                 {
                     rankText.text = entry.rank.ToString() + ".";
-                } else {
+                } 
+                else 
+                {
                     Debug.LogWarning($"Prefab '{leaderboardEntryPrefab.name}' içinde 'RankText' isimli TMP UGUI objesi bulunamadı.");
                 }
 
                 if (nameText != null)
                 {
                     nameText.text = entry.username;
-                } else {
+                }
+                else 
+                {
                      Debug.LogWarning($"Prefab '{leaderboardEntryPrefab.name}' içinde 'NameText' isimli TMP UGUI objesi bulunamadı.");
                 }
 
                 if (scoreText != null)
                 {
                     scoreText.text = entry.score.ToString();
-                } else {
+                } 
+                else 
+                {
                      Debug.LogWarning($"Prefab '{leaderboardEntryPrefab.name}' içinde 'ScoreText' isimli TMP UGUI objesi bulunamadı.");
                 }
             }
@@ -252,7 +260,7 @@ public class AnaMenu : MonoBehaviour
         }
     }
 
-    void ClearLeaderboardUI()
+    void ClearLeaderboardUI()//liderlik tablosu temizleme
     {
         if (leaderboardContentPanel == null) return;
 
@@ -264,12 +272,11 @@ public class AnaMenu : MonoBehaviour
 
     void Start()
     {
-        RequestLeaderboardData();
+        RequestLeaderboardData();//sahne acilir acilmaz liderlik tablosu verisini iste
     }
 
-    public void KlavyeAcilipKapanmasi()
+    public void KlavyeAcilipKapanmasi()//kullanici adi alanina tiklayinca acilan kisim
     {
         klavye.SetActive(true);
     }
-    
 }

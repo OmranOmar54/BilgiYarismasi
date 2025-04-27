@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
         printBox.text = "Kullanıcı Adı Giriniz";
-        textBox.text = "Kullanıcı Adı Giriniz";
+        textBox.text = "";
     }
 
     public void DeleteLetter()
