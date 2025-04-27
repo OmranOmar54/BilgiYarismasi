@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEngine.EventSystems;
 using UnityEditor.Compilation;
+using System.Text.RegularExpressions;
 
 public class AnaMenu : MonoBehaviour
 {
@@ -16,29 +17,55 @@ public class AnaMenu : MonoBehaviour
     string kullaniciAdi;
     string kullaniciIP;
     int kullaniciScore;
-    string kullaniciParola;
     public GameObject IDHatasi;
+    public TextMeshProUGUI IDHatasiText;
     public GameObject leaderboardEntryPrefab;
     public Transform leaderboardContentPanel;
     public TextMeshProUGUI leaderboardStatusText;
     public GameObject klavye;
     private string apiUrl = "https://bilgiyarismasi-api.onrender.com";
 
+    public static bool KullaniciAdiUygunMu(string input){
+        if (string.IsNullOrEmpty(input)){
+            return false;
+        }
+        return Regex.IsMatch(input, @"[çğıöşüÇĞİÖŞÜ\s]");
+    }
+
     public void OyunaBasla() //Oyuna basla butonunda cagirilacak script
     {
         kullaniciAdi = kullaniciAdiAlani.text; //kullanici adi textini aliyor
-        
+        if(!KullaniciAdiUygunMu(kullaniciAdi)){
+            if (!string.IsNullOrEmpty(kullaniciAdi)) //kullanici adi bos degil ise
+            {
+                if(!Regex.IsMatch(kullaniciAdi, @"[qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM]")){
+                    IDHatasi.SetActive(true);
+                    IDHatasiText.text = "Kullanıcı Adı Yalnızca Rakam veya Karakter İçeremez";
+                }
+                else{
+                    StartCoroutine(CheckUsername(kullaniciAdi));
+                    IDHatasi.SetActive(false); 
+                }
+            }
 
-        if (!string.IsNullOrEmpty(kullaniciAdi)) //kullanici adi bos degil ise
-        {
-            StartCoroutine(CheckUsername(kullaniciAdi));
-            IDHatasi.SetActive(false); 
+            else//kullanici adi bos ise
+            {
+                IDHatasi.SetActive(true);
+                IDHatasiText.text = "Kullanıcı Adı Boş Bırakılamaz";
+
+            }
         }
-
-        else//kullanici adi bos ise
-        {
+        else{
+            Debug.LogError("Kullanıcı Adı Uygun Değil");
             IDHatasi.SetActive(true);
+            if(Regex.IsMatch(kullaniciAdi, @"[\s]")){
+                IDHatasiText.text = "Kullanıcı Adı Boşluk Barındıramaz";
+            }
+            else if(Regex.IsMatch(kullaniciAdi, @"[çğıöşüÇĞİÖŞÜ]")){
+                IDHatasiText.text = "Kullanıcı Adı Türkçe Karakter Barındıramaz";
+            }
         }
+        
     }
 
     public class UsernameToSend{
@@ -76,11 +103,13 @@ public class AnaMenu : MonoBehaviour
             if(response.success)
             {
                 Debug.LogWarning("Kullanıcı Bulundu.");
-                StartCoroutine(GetIPAndProceed()); 
+                IDHatasi.SetActive(true);
+                IDHatasiText.text = "Bu Kullanıcı Adı Zaten Kullanılmış. Lütfen Başka Kullanıcı Adı Seçiniz";
             }
             else
             {
                 Debug.LogWarning("Kullanıcı Bulunamadı.");
+                StartCoroutine(GetIPAndProceed()); 
             }    
         }
     }
@@ -98,7 +127,7 @@ public class AnaMenu : MonoBehaviour
             kullaniciIP = ipRequest.downloadHandler.text;
             Debug.Log("Kullanıcının IP Adresi: " + kullaniciIP);
 
-            kullaniciScore = 100;
+            kullaniciScore = 0;
             StartCoroutine(SendScoreToServer(kullaniciAdi, kullaniciIP, kullaniciScore));//kullanici verilerini database'e gonderme islemini baslat
         
         }

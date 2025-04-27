@@ -206,6 +206,7 @@ MonoBehaviour:
   hakkindaMenusu: {fileID: 353429046}
   kullaniciAdiAlani: {fileID: 78852130}
   IDHatasi: {fileID: 524726039}
+  IDHatasiText: {fileID: 420030432}
   leaderboardEntryPrefab: {fileID: 6271301253945267557, guid: 011d4075f7dada94db90ffd8272a3f0f, type: 3}
   leaderboardContentPanel: {fileID: 1801052820}
   leaderboardStatusText: {fileID: 113796285}
@@ -1071,7 +1072,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 45.6
+  m_fontSize: 30.6
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2180,7 +2181,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.25
+  m_fontSize: 22.2
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
