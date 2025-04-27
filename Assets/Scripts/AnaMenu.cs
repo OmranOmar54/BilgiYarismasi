@@ -11,7 +11,7 @@ public class AnaMenu : MonoBehaviour
 {
     public GameObject hakkindaMenusu;
     private bool hakkindaAcikMi = false;
-    public TMP_InputField kullaniciAdiAlani;
+    public TextMeshProUGUI kullaniciAdiAlani;
     string kullaniciAdi;
     string kullaniciIP;
     public GameObject IDHatasi;
