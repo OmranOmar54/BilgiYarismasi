@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEngine.EventSystems;
-using UnityEditor.Compilation;
 using System.Text.RegularExpressions;
 
 public class AnaMenu : MonoBehaviour
