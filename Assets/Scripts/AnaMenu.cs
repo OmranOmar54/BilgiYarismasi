@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEngine.EventSystems;
+using UnityEditor.Compilation;
 
 public class AnaMenu : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class AnaMenu : MonoBehaviour
     string kullaniciAdi;
     string kullaniciIP;
     int kullaniciScore;
+    string kullaniciParola;
     public GameObject IDHatasi;
     public GameObject leaderboardEntryPrefab;
     public Transform leaderboardContentPanel;
@@ -25,16 +27,61 @@ public class AnaMenu : MonoBehaviour
     public void OyunaBasla() //Oyuna basla butonunda cagirilacak script
     {
         kullaniciAdi = kullaniciAdiAlani.text; //kullanici adi textini aliyor
+        
 
         if (!string.IsNullOrEmpty(kullaniciAdi)) //kullanici adi bos degil ise
         {
+            StartCoroutine(CheckUsername(kullaniciAdi));
             IDHatasi.SetActive(false); 
-            StartCoroutine(GetIPAndProceed());//ip toplama surecini baslat
         }
 
         else//kullanici adi bos ise
         {
             IDHatasi.SetActive(true);
+        }
+    }
+
+    public class UsernameToSend{
+        public string username;
+    }
+
+    [System.Serializable]
+    public class ResponseData{
+        public bool success;
+        public string message;
+    }
+
+    IEnumerator CheckUsername(string username)
+    {
+        yield return null;
+        UsernameToSend nameToSend = new UsernameToSend{
+            username = username
+        };
+
+        string getUsernameApi = apiUrl + "/check_username"; 
+
+        string jsonData = JsonUtility.ToJson(nameToSend);
+        byte[] jsonToSendBytes = new UTF8Encoding().GetBytes(jsonData);
+
+        using(UnityWebRequest request = new UnityWebRequest(getUsernameApi, "POST")){
+            request.uploadHandler = new UploadHandlerRaw(jsonToSendBytes);
+            request.downloadHandler = new DownloadHandlerBuffer();
+        
+            request.SetRequestHeader("Content-Type", "application/json");
+            yield return request.SendWebRequest();
+
+            ResponseData response = JsonUtility.FromJson<ResponseData>(request.downloadHandler.text);
+            Debug.Log(response);
+
+            if(response.success)
+            {
+                Debug.LogWarning("Kullanıcı Bulundu.");
+                StartCoroutine(GetIPAndProceed()); 
+            }
+            else
+            {
+                Debug.LogWarning("Kullanıcı Bulunamadı.");
+            }    
         }
     }
 
