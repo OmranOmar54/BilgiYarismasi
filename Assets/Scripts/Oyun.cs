@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.Rendering;
 using UnityEngine.Networking;
 using System.Text.RegularExpressions;
+using SimpleJSON;
 
 
 public class Oyun : MonoBehaviour
@@ -38,6 +39,7 @@ public class Oyun : MonoBehaviour
     public int puan;
     public int dogru;
     public int yanlis;
+    public int siralama;
     public TextMeshProUGUI puanText;
     public TextMeshProUGUI dogruText;
     public TextMeshProUGUI yanlisText;
@@ -50,7 +52,7 @@ public class Oyun : MonoBehaviour
     public GameObject geciciUyari;
     public TextMeshProUGUI geciciYazi;
 
-    private string apiUrl = "https://bilgiyarismasi-api.onrender.com/update_score";
+    private string apiUrl = "https://bilgiyarismasi-api.onrender.com";
 
 
     void Start()
@@ -143,7 +145,8 @@ public class Oyun : MonoBehaviour
 
     public void SureBitti(){
         oyunSonuPanel.SetActive(true);
-        oyunSonuText.text = "Tebrikler " + kullaniciAdi + ", " + dogru + " doğru ve " + yanlis + " yanlış ile " + puan + " puan yapıp {sira} sıraya yerleştiniz";
+        StartCoroutine(FindRank(kullaniciAdi));
+        oyunSonuText.text = "Tebrikler " + kullaniciAdi + ", " + dogru + " doğru ve " + yanlis + " yanlış ile " + puan + " puan yapıp " + siralama +" sıraya yerleştiniz";
        StartCoroutine(UpdateScore(kullaniciAdi, puan));
     }
 
@@ -198,10 +201,12 @@ public class Oyun : MonoBehaviour
         score =score
         };
 
+        string updateScoreApiUrl = apiUrl + "/update_score";
+
          string jsonData = JsonUtility.ToJson(yeniData);
          byte[] jsonToSendBytes = new UTF8Encoding().GetBytes(jsonData);
 
-         using (UnityWebRequest request = new UnityWebRequest(apiUrl, "POST"))
+         using (UnityWebRequest request = new UnityWebRequest(updateScoreApiUrl, "POST"))
         {
             request.uploadHandler = new UploadHandlerRaw(jsonToSendBytes);
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -212,7 +217,7 @@ public class Oyun : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)//gelen veri hata mesaji ise
             {
-                Debug.LogError($"API Gönderme Hatası ({apiUrl}): {request.error}");
+                Debug.LogError($"API Gönderme Hatası ({updateScoreApiUrl}): {request.error}");
                 if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
                 {
                     Debug.LogError("Sunucu Hata Yanıtı: " + request.downloadHandler.text);
@@ -225,6 +230,46 @@ public class Oyun : MonoBehaviour
                 {
                     Debug.Log("Sunucu Yanıtı: " + request.downloadHandler.text);
                 }
+            }
+        }
+    }
+    
+    [System.Serializable]
+    public class UsernameData
+    {
+        public string username;
+    }
+
+    IEnumerator FindRank(string username){
+        string findRankApiUrl = apiUrl + "/get_rank";
+
+        UsernameData data = new UsernameData();
+
+        data.username = username;
+
+        string jsonData = JsonUtility.ToJson(data);
+        byte[] jsonToSendBytes = new UTF8Encoding().GetBytes(jsonData);
+
+        using(UnityWebRequest request = new UnityWebRequest(findRankApiUrl, "POST")){
+            request.uploadHandler = new UploadHandlerRaw(jsonToSendBytes);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)//gelen veri hata mesaji ise
+            {
+                Debug.LogError($"API Gönderme Hatası ({findRankApiUrl}): {request.error}");
+                if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
+                {
+                    Debug.LogError("Sunucu Hata Yanıtı: " + request.downloadHandler.text);
+                }
+            }
+            else{
+                var json = JSON.Parse(request.downloadHandler.text);
+                int rank = json["rank"].AsInt;
+                siralama = rank;
             }
         }
     }
