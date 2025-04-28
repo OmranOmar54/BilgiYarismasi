@@ -48,9 +48,10 @@ public class Oyun : MonoBehaviour
     public GameObject oyunSonuPanel;
     public TextMeshProUGUI oyunSonuText;
    
-    [Header("Gecici Bilesenler")]
+    [Header("Diğer Bilesenler")]
     public GameObject geciciUyari;
     public TextMeshProUGUI geciciYazi;
+    public GameObject cikisMenusu;
 
     private string apiUrl = "https://bilgiyarismasi-api.onrender.com";
 
@@ -140,18 +141,17 @@ public class Oyun : MonoBehaviour
 
         isTimerActive = false;
         timerText.text = "Süre doldu!";
+        cikisMenusu.SetActive(false);
         SureBitti();
     }
 
     public void SureBitti(){
-        oyunSonuPanel.SetActive(true);
-        StartCoroutine(FindRank(kullaniciAdi));
-        oyunSonuText.text = "Tebrikler " + kullaniciAdi + ", " + dogru + " doğru ve " + yanlis + " yanlış ile " + puan + " puan yapıp " + siralama +" sıraya yerleştiniz";
-       StartCoroutine(UpdateScore(kullaniciAdi, puan));
+        StartCoroutine(UpdateScore(kullaniciAdi, puan, false));
     }
 
     public void AnaMenuyeDon()
     {
+        StartCoroutine(UpdateScore(kullaniciAdi, puan, true));
         SceneManager.LoadScene("AnaMenu");
     }
 
@@ -194,7 +194,7 @@ public class Oyun : MonoBehaviour
         public int score;
     }
 
-    IEnumerator UpdateScore(string username, int score){
+    IEnumerator UpdateScore(string username, int score, bool oyunSonuMu){
         GuncellenecekData yeniData = new GuncellenecekData
         {
         username = username,
@@ -230,6 +230,9 @@ public class Oyun : MonoBehaviour
                 {
                     Debug.Log("Sunucu Yanıtı: " + request.downloadHandler.text);
                 }
+                yield return new WaitForSeconds(0.5f);
+                StartCoroutine(FindRank(kullaniciAdi, oyunSonuMu));
+
             }
         }
     }
@@ -240,7 +243,7 @@ public class Oyun : MonoBehaviour
         public string username;
     }
 
-    IEnumerator FindRank(string username){
+    IEnumerator FindRank(string username, bool oyunSonuMu){
         string findRankApiUrl = apiUrl + "/get_rank";
 
         UsernameData data = new UsernameData();
@@ -270,8 +273,22 @@ public class Oyun : MonoBehaviour
                 var json = JSON.Parse(request.downloadHandler.text);
                 int rank = json["rank"].AsInt;
                 siralama = rank;
+                if(!oyunSonuMu)
+                {
+                    yield return new WaitForSeconds(0.5f);
+                    oyunSonuPanel.SetActive(true);
+                    oyunSonuText.text = "Tebrikler " + kullaniciAdi + ", " + dogru + " doğru ve " + yanlis + " yanlış ile " + puan + " puan yapıp " + siralama +" sıraya yerleştiniz";
+                }
+                
             }
         }
+    }
+
+    public void CikmaTusu(){
+        cikisMenusu.SetActive(true);
+    }
+    public void CikmaTusuIptal(){
+        cikisMenusu.SetActive(false);
     }
 }
 

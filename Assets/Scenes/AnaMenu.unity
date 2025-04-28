@@ -205,6 +205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hakkindaMenusu: {fileID: 353429046}
   kullaniciAdiAlani: {fileID: 78852130}
+  kullaniciScore: 0
   IDHatasi: {fileID: 524726039}
   IDHatasiText: {fileID: 420030432}
   leaderboardEntryPrefab: {fileID: 6271301253945267557, guid: 011d4075f7dada94db90ffd8272a3f0f, type: 3}
@@ -836,10 +837,10 @@ RectTransform:
   - {fileID: 473101627}
   m_Father: {fileID: 1021783251}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -150, y: -150}
+  m_AnchorMin: {x: 0.09583335, y: 0.0555}
+  m_AnchorMax: {x: 0.8972779, y: 0.94449997}
+  m_AnchoredPosition: {x: 2.5, y: 0}
+  m_SizeDelta: {x: -7, y: -8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &353429048
 MonoBehaviour:
@@ -1499,10 +1500,10 @@ RectTransform:
   - {fileID: 454660451}
   m_Father: {fileID: 353429047}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -25, y: -25}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchorMin: {x: 0.78073716, y: 0.8894251}
+  m_AnchorMax: {x: 0.95438915, y: 0.978115}
+  m_AnchoredPosition: {x: 1, y: 0}
+  m_SizeDelta: {x: 1, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &473101628
 MonoBehaviour:
@@ -3760,10 +3761,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 432032078}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0.025, y: 0.054}
+  m_AnchorMax: {x: 0.975, y: 0.94637114}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 380, y: 90}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1728646656
 MonoBehaviour:
