@@ -3,24 +3,44 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEditor.Rendering;
 
 
 public class Oyun : MonoBehaviour
 {
+    
+    [Header("Oyun Zamanlayicisi")]
     public TextMeshProUGUI timerText; 
-    private int remainingTime = 60;
+    public int remainingTime = 60;
     public bool isTimerActive = false;
 
-    public TextMeshProUGUI soru,a,b,c,d;
+    [Header("Baslangic Mesaji")]
+    public TextMeshProUGUI baslangicSayaciText;
+    private GameObject baslangicMesaji;
 
+    [Header("Soru Mekanigi")]
+    public TextMeshProUGUI soru;
+    public TextMeshProUGUI a;
+    public TextMeshProUGUI b;
+    public TextMeshProUGUI c;
+    public TextMeshProUGUI d;
     public Soru rastgeleSoru;
+    public TextMeshProUGUI soruSayisiText;
 
+    private int mevcutSoruSayisi = 1;
+
+    [Header("Gecici Bilesenler")]
     public GameObject geciciUyari;
     public TextMeshProUGUI geciciYazi;
 
     void Start()
     {
-        yeniSoruOlustur();
+        baslangicMesaji = GameObject.Find("GirisPaneli");
+        if(baslangicMesaji == null){
+            Debug.LogError("GirisPaneli Bulunamadı");
+        }
+        baslangicMesaji.SetActive(true);
+        StartCoroutine(BaslangicSayaci());
     }
 
     void yeniSoruOlustur()
@@ -41,7 +61,22 @@ public class Oyun : MonoBehaviour
             StartCoroutine(StartCountdown());
             isTimerActive = false;
         }
+        soruSayisiText.text = "Soru " + mevcutSoruSayisi;
         
+    }
+
+    IEnumerator BaslangicSayaci(){
+        int kalanZaman = 5;
+        while (kalanZaman > 0){
+            baslangicSayaciText.text = kalanZaman.ToString();
+            yield return new WaitForSeconds(1f);
+            kalanZaman--;
+        }
+        baslangicSayaciText.text = "Başarılar!";
+        
+        yeniSoruOlustur();
+        baslangicMesaji.SetActive(false);
+        isTimerActive = true;
     }
 
     IEnumerator StartCountdown()
@@ -70,6 +105,8 @@ public class Oyun : MonoBehaviour
             geciciYazi.text = "Doğru";
             geciciUyari.SetActive(true);       
             yeniSoruOlustur();
+            mevcutSoruSayisi += 1;
+
         }
         else
         {
@@ -77,6 +114,8 @@ public class Oyun : MonoBehaviour
             geciciYazi.text = "Yanlış";
             geciciUyari.SetActive(true);
             yeniSoruOlustur();
+            mevcutSoruSayisi += 1;
+
         }
     }
     public void ByeBasti()
@@ -87,12 +126,14 @@ public class Oyun : MonoBehaviour
             geciciYazi.text = "Doğru";
             geciciUyari.SetActive(true);        
             yeniSoruOlustur();
+            mevcutSoruSayisi += 1;
         }
         else
         {
             Debug.Log("Yanlış");
             geciciYazi.text = "Yanlış";
             geciciUyari.SetActive(true);
+            mevcutSoruSayisi += 1;
             yeniSoruOlustur();
         }
     }
@@ -103,6 +144,7 @@ public class Oyun : MonoBehaviour
             Debug.Log("Doğru");
             geciciYazi.text = "Doğru";
             geciciUyari.SetActive(true);
+            mevcutSoruSayisi += 1;
             yeniSoruOlustur();
         }
         else
@@ -110,6 +152,7 @@ public class Oyun : MonoBehaviour
             Debug.Log("Yanlış");
             geciciYazi.text = "Yanlış";
             geciciUyari.SetActive(true);
+            mevcutSoruSayisi += 1;
             yeniSoruOlustur();
         }
     }
@@ -120,6 +163,7 @@ public class Oyun : MonoBehaviour
             Debug.Log("Doğru");
             geciciYazi.text = "Doğru";
             geciciUyari.SetActive(true);
+            mevcutSoruSayisi += 1;
             yeniSoruOlustur();
         }
         else
@@ -127,6 +171,7 @@ public class Oyun : MonoBehaviour
             Debug.Log("Yanlış");
             geciciYazi.text = "Yanlış";
             geciciUyari.SetActive(true);
+            mevcutSoruSayisi += 1;
             yeniSoruOlustur();
         }
     }
@@ -168,6 +213,15 @@ public static class SoruVeritabani
     public static Soru RastgeleSoruGetir()
     {
         int index = Random.Range(0, sorular.Count);
-        return sorular[index];
+        if(sorular.Count != 0){
+            Soru selectedSoru = sorular[index];  // Soruyu seç
+            sorular.RemoveAt(index);  // Seçilen soruyu listeden çıkar
+            return selectedSoru;  // Seçilen soruyu geri döndür
+        }
+
+        else{
+            Debug.LogError("Soru Kalmadı");
+            return new Soru(0, "Soru Kalmadı", "", "", "", "", 'e');
+        }
     }
 }
