@@ -1,9 +1,12 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEditor.Rendering;
+using UnityEngine.Networking;
+using System.Text.RegularExpressions;
 
 
 public class Oyun : MonoBehaviour
@@ -29,12 +32,31 @@ public class Oyun : MonoBehaviour
 
     private int mevcutSoruSayisi = 1;
 
+    [Header("Kullanıcı Bilgileri")]
+    public string kullaniciAdi;
+    public string kullaniciIP;
+    public int puan;
+    public int dogru;
+    public int yanlis;
+    public TextMeshProUGUI puanText;
+    public TextMeshProUGUI dogruText;
+    public TextMeshProUGUI yanlisText;
+
+    [Header("Oyun Sonu Bilgileri")]
+    public GameObject oyunSonuPanel;
+    public TextMeshProUGUI oyunSonuText;
+   
     [Header("Gecici Bilesenler")]
     public GameObject geciciUyari;
     public TextMeshProUGUI geciciYazi;
 
+    private string apiUrl = "https://bilgiyarismasi-api.onrender.com/update_score";
+
+
     void Start()
     {
+        kullaniciAdi = AnaMenu.kullaniciAdi;
+        kullaniciIP = AnaMenu.kullaniciIP;
         baslangicMesaji = GameObject.Find("GirisPaneli");
         if(baslangicMesaji == null){
             Debug.LogError("GirisPaneli Bulunamadı");
@@ -62,7 +84,33 @@ public class Oyun : MonoBehaviour
             isTimerActive = false;
         }
         soruSayisiText.text = "Soru " + mevcutSoruSayisi;
+        puanText.text = puan.ToString();
+        dogruText.text = dogru.ToString();
+        yanlisText.text = yanlis.ToString();
         
+
+    }
+
+    IEnumerator BirazBekle(float beklenecekZaman, bool dogruMu){
+        mevcutSoruSayisi += 1;
+        if(dogruMu){
+            geciciYazi.text = "Doğru";
+            geciciUyari.SetActive(true);
+            yield return new WaitForSeconds(beklenecekZaman);
+            dogru += 1;
+            puan += 100 ;
+            geciciUyari.SetActive(false);
+        }
+        else{
+            geciciYazi.text = "Yanlış";
+            geciciUyari.SetActive(true);
+            yield return new WaitForSeconds(beklenecekZaman);
+            yanlis += 1;
+            puan -=20;
+            geciciUyari.SetActive(false);
+        }
+        yeniSoruOlustur();
+
     }
 
     IEnumerator BaslangicSayaci(){
@@ -90,6 +138,13 @@ public class Oyun : MonoBehaviour
 
         isTimerActive = false;
         timerText.text = "Süre doldu!";
+        SureBitti();
+    }
+
+    public void SureBitti(){
+        oyunSonuPanel.SetActive(true);
+        oyunSonuText.text = "Tebrikler " + kullaniciAdi + ", " + dogru + " doğru ve " + yanlis + " yanlış ile " + puan + " puan yapıp {sira} sıraya yerleştiniz";
+       StartCoroutine(UpdateScore(kullaniciAdi, puan));
     }
 
     public void AnaMenuyeDon()
@@ -99,88 +154,82 @@ public class Oyun : MonoBehaviour
 
     public void AyaBasti()
     {
-        if(rastgeleSoru.dogruSik == 'A')
-        {
-            Debug.Log("Doğru");
-            geciciYazi.text = "Doğru";
-            geciciUyari.SetActive(true);       
-            yeniSoruOlustur();
-            mevcutSoruSayisi += 1;
-
-        }
-        else
-        {
-            Debug.Log("Yanlış");
-            geciciYazi.text = "Yanlış";
-            geciciUyari.SetActive(true);
-            yeniSoruOlustur();
-            mevcutSoruSayisi += 1;
-
-        }
+        cevapKontrol('A');
     }
     public void ByeBasti()
     {
-        if(rastgeleSoru.dogruSik == 'B')
-        {
-            Debug.Log("Doğru");
-            geciciYazi.text = "Doğru";
-            geciciUyari.SetActive(true);        
-            yeniSoruOlustur();
-            mevcutSoruSayisi += 1;
-        }
-        else
-        {
-            Debug.Log("Yanlış");
-            geciciYazi.text = "Yanlış";
-            geciciUyari.SetActive(true);
-            mevcutSoruSayisi += 1;
-            yeniSoruOlustur();
-        }
+        cevapKontrol('B');
     }
     public void CyeBasti()
     {
-        if(rastgeleSoru.dogruSik == 'C')
-        {
-            Debug.Log("Doğru");
-            geciciYazi.text = "Doğru";
-            geciciUyari.SetActive(true);
-            mevcutSoruSayisi += 1;
-            yeniSoruOlustur();
-        }
-        else
-        {
-            Debug.Log("Yanlış");
-            geciciYazi.text = "Yanlış";
-            geciciUyari.SetActive(true);
-            mevcutSoruSayisi += 1;
-            yeniSoruOlustur();
-        }
+        cevapKontrol('C');
     }
     public void DyeBasti()
     {
-        if(rastgeleSoru.dogruSik == 'D')
-        {
-            Debug.Log("Doğru");
-            geciciYazi.text = "Doğru";
-            geciciUyari.SetActive(true);
-            mevcutSoruSayisi += 1;
-            yeniSoruOlustur();
-        }
-        else
-        {
-            Debug.Log("Yanlış");
-            geciciYazi.text = "Yanlış";
-            geciciUyari.SetActive(true);
-            mevcutSoruSayisi += 1;
-            yeniSoruOlustur();
-        }
+        cevapKontrol('D');
     }
     
     public void UyariKapandi()
     {
         geciciUyari.SetActive(false);
     }
+
+    private void cevapKontrol(char cevap){
+        if(rastgeleSoru.dogruSik == cevap)
+        {
+            StartCoroutine(BirazBekle(1f, true));
+        }
+        else
+        {
+            StartCoroutine(BirazBekle(1f, false));
+        }
+    }
+
+    [SerializeField]
+    private class GuncellenecekData{
+        public string username;
+        public int score;
+    }
+
+    IEnumerator UpdateScore(string username, int score){
+        GuncellenecekData yeniData = new GuncellenecekData
+        {
+        username = username,
+        score =score
+        };
+
+         string jsonData = JsonUtility.ToJson(yeniData);
+         byte[] jsonToSendBytes = new UTF8Encoding().GetBytes(jsonData);
+
+         using (UnityWebRequest request = new UnityWebRequest(apiUrl, "POST"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(jsonToSendBytes);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)//gelen veri hata mesaji ise
+            {
+                Debug.LogError($"API Gönderme Hatası ({apiUrl}): {request.error}");
+                if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
+                {
+                    Debug.LogError("Sunucu Hata Yanıtı: " + request.downloadHandler.text);
+                }
+            }
+            else//hata mesaji degil ise
+            {
+                Debug.Log("Skor başarıyla Güncellendi");
+                if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
+                {
+                    Debug.Log("Sunucu Yanıtı: " + request.downloadHandler.text);
+                }
+            }
+        }
+    }
 }
+
 
 public class Soru
 {

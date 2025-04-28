@@ -13,16 +13,16 @@ public class AnaMenu : MonoBehaviour
     public GameObject hakkindaMenusu;
     private bool hakkindaAcikMi = false;
     public TextMeshProUGUI kullaniciAdiAlani; 
-    string kullaniciAdi;
-    string kullaniciIP;
-    int kullaniciScore;
+    public static string kullaniciAdi;
+    public static string kullaniciIP;
+    public int kullaniciScore;
     public GameObject IDHatasi;
     public TextMeshProUGUI IDHatasiText;
     public GameObject leaderboardEntryPrefab;
     public Transform leaderboardContentPanel;
     public TextMeshProUGUI leaderboardStatusText;
     public GameObject klavye;
-    private string apiUrl = "https://bilgiyarismasi-api.onrender.com";
+    public static string apiUrl = "https://bilgiyarismasi-api.onrender.com";
 
     public static bool KullaniciAdiUygunMu(string input){
         if (string.IsNullOrEmpty(input)){
@@ -30,6 +30,7 @@ public class AnaMenu : MonoBehaviour
         }
         return Regex.IsMatch(input, @"[çğıöşüÇĞİÖŞÜ\s]");
     }
+
 
     public void OyunaBasla() //Oyuna basla butonunda cagirilacak script
     {
@@ -148,7 +149,7 @@ public class AnaMenu : MonoBehaviour
         public int score;
     }
 
-    IEnumerator SendScoreToServer(string username, string ip, int scoreValue)
+    public static IEnumerator SendScoreToServer(string username, string ip, int scoreValue)
     {
         ScoreData dataToSend = new ScoreData
         {
