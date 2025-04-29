@@ -8,6 +8,7 @@ using UnityEditor.Rendering;
 using UnityEngine.Networking;
 using System.Text.RegularExpressions;
 using SimpleJSON;
+using System.Linq;
 
 
 public class Oyun : MonoBehaviour
@@ -58,6 +59,7 @@ public class Oyun : MonoBehaviour
 
     void Start()
     {
+        SoruVeritabani.SilinenleriCagir();
         kullaniciAdi = AnaMenu.kullaniciAdi;
         kullaniciIP = AnaMenu.kullaniciIP;
         baslangicMesaji = GameObject.Find("GirisPaneli");
@@ -152,7 +154,6 @@ public class Oyun : MonoBehaviour
     public void AnaMenuyeDon()
     {
         StartCoroutine(UpdateScore(kullaniciAdi, puan, true));
-        SceneManager.LoadScene("AnaMenu");
     }
 
     public void AyaBasti()
@@ -230,8 +231,15 @@ public class Oyun : MonoBehaviour
                 {
                     Debug.Log("Sunucu Yanıtı: " + request.downloadHandler.text);
                 }
-                yield return new WaitForSeconds(0.5f);
-                StartCoroutine(FindRank(kullaniciAdi, oyunSonuMu));
+                if(oyunSonuMu){
+                    yield return new WaitForSeconds(1f);
+                    Debug.Log("Kullanıcı Sıraya Kaydedildi.");
+                    SceneManager.LoadScene("AnaMenu");
+                }
+                else{
+                    yield return new WaitForSeconds(0.5f);
+                    StartCoroutine(FindRank(kullaniciAdi));
+                }
 
             }
         }
@@ -243,7 +251,7 @@ public class Oyun : MonoBehaviour
         public string username;
     }
 
-    IEnumerator FindRank(string username, bool oyunSonuMu){
+    IEnumerator FindRank(string username){
         string findRankApiUrl = apiUrl + "/get_rank";
 
         UsernameData data = new UsernameData();
@@ -273,13 +281,10 @@ public class Oyun : MonoBehaviour
                 var json = JSON.Parse(request.downloadHandler.text);
                 int rank = json["rank"].AsInt;
                 siralama = rank;
-                if(!oyunSonuMu)
-                {
-                    yield return new WaitForSeconds(0.5f);
-                    oyunSonuPanel.SetActive(true);
-                    oyunSonuText.text = "Tebrikler " + kullaniciAdi + ", " + dogru + " doğru ve " + yanlis + " yanlış ile " + puan + " puan yapıp " + siralama +" sıraya yerleştiniz";
-                }
-                
+            
+                yield return new WaitForSeconds(0.5f);
+                oyunSonuPanel.SetActive(true);
+                oyunSonuText.text = "Tebrikler " + kullaniciAdi + ", " + dogru + " doğru ve " + yanlis + " yanlış ile " + puan + " puan yapıp " + siralama +" sıraya yerleştiniz";                               
             }
         }
     }
@@ -321,6 +326,10 @@ public static class SoruVeritabani
         new Soru(2, "Dünya'nın en büyük okyanusu hangisidir?", "Hint", "Atlas", "Pasifik", "Arktik", 'C'),
         new Soru(3, "2 + 2 kaç eder?", "3", "4", "5", "6", 'B'),
     };
+
+    private static List<Soru> silinenSorular = new List<Soru>(){
+
+    };
     public static Soru RastgeleSoruGetir()
     {
         int index = Random.Range(0, sorular.Count);
@@ -334,5 +343,16 @@ public static class SoruVeritabani
             Debug.LogError("Soru Kalmadı");
             return new Soru(0, "Soru Kalmadı", "", "", "", "", 'e');
         }
+    }
+
+    public static void SilinenleriCagir(){
+        if(silinenSorular.Count != 0){
+            for (int i = silinenSorular.Count; i>= 0; i--){
+                sorular.Add(silinenSorular[i]);
+                silinenSorular.Remove(silinenSorular[i]);
+            }
+            Debug.Log("Silinen Sorular Geri Aktarıldı.");
+        }
+        
     }
 }
