@@ -9,6 +9,7 @@ using UnityEngine.Networking;
 using System.Text.RegularExpressions;
 using SimpleJSON;
 using System.Linq;
+using JetBrains.Annotations;
 
 
 public class Oyun : MonoBehaviour
@@ -54,20 +55,37 @@ public class Oyun : MonoBehaviour
     public TextMeshProUGUI geciciYazi;
     public GameObject cikisMenusu;
 
+    [Header("Admin Bilgileri")]
+    public bool adminMode = false;
+
     private string apiUrl = "https://bilgiyarismasi-api.onrender.com";
 
+    void Awake()
+    {
+        adminMode = AnaMenu.adminMode;
+        Debug.Log("Awake");
+        SoruVeritabani.SilinenleriCagir();  // Sahne yüklendiğinde silinen soruları geri yükle
+    }
 
     void Start()
     {
-        SoruVeritabani.SilinenleriCagir();
-        kullaniciAdi = AnaMenu.kullaniciAdi;
-        kullaniciIP = AnaMenu.kullaniciIP;
         baslangicMesaji = GameObject.Find("GirisPaneli");
-        if(baslangicMesaji == null){
-            Debug.LogError("GirisPaneli Bulunamadı");
+
+        if(!adminMode){
+            kullaniciAdi = AnaMenu.kullaniciAdi;
+            kullaniciIP = AnaMenu.kullaniciIP;
+            if(baslangicMesaji == null){
+                Debug.LogError("GirisPaneli Bulunamadı");
+            }
+            baslangicMesaji.SetActive(true);
+            StartCoroutine(BaslangicSayaci());
         }
-        baslangicMesaji.SetActive(true);
-        StartCoroutine(BaslangicSayaci());
+        else{
+            kullaniciAdi = "admin";
+            kullaniciIP = "0.0.0.0";
+            baslangicMesaji.SetActive(false);
+            yeniSoruOlustur();
+        }
     }
 
     void yeniSoruOlustur()
@@ -93,7 +111,6 @@ public class Oyun : MonoBehaviour
         dogruText.text = dogru.ToString();
         yanlisText.text = yanlis.ToString();
         
-
     }
 
     IEnumerator BirazBekle(float beklenecekZaman, bool dogruMu){
@@ -153,7 +170,12 @@ public class Oyun : MonoBehaviour
 
     public void AnaMenuyeDon()
     {
-        StartCoroutine(UpdateScore(kullaniciAdi, puan, true));
+        if(!adminMode){
+            StartCoroutine(UpdateScore(kullaniciAdi, puan, true));
+        }
+        else{
+            SceneManager.LoadScene("AnaMenu");
+        }
     }
 
     public void AyaBasti()
@@ -322,37 +344,43 @@ public static class SoruVeritabani
 {
     private static List<Soru> sorular = new List<Soru>()
     {
-        new Soru(1, "Türkiye'nin başkenti neresidir?", "İstanbul", "Ankara", "İzmir", "Bursa", 'B'),
+        new Soru(1, "Türkiye'nin başkenti neresidir?", "İstanbul", "Ankara", "Sakarya", "Bursa", 'B'),
         new Soru(2, "Dünya'nın en büyük okyanusu hangisidir?", "Hint", "Atlas", "Pasifik", "Arktik", 'C'),
         new Soru(3, "2 + 2 kaç eder?", "3", "4", "5", "6", 'B'),
     };
 
     private static List<Soru> silinenSorular = new List<Soru>(){
-
     };
+
     public static Soru RastgeleSoruGetir()
     {
-        int index = Random.Range(0, sorular.Count);
-        if(sorular.Count != 0){
-            Soru selectedSoru = sorular[index];  // Soruyu seç
-            sorular.RemoveAt(index);  // Seçilen soruyu listeden çıkar
-            return selectedSoru;  // Seçilen soruyu geri döndür
+        if (sorular.Count == 0)
+        {
+            // Eğer sorular listesi boşsa, silinen soruları geri çağırıyoruz
+            //SilinenleriCagir();
+            return new Soru(0, "", "", "", "", "", 's');
         }
 
-        else{
-            Debug.LogError("Soru Kalmadı");
-            return new Soru(0, "Soru Kalmadı", "", "", "", "", 'e');
-        }
+        int index = Random.Range(0, sorular.Count);
+        Soru selectedSoru = sorular[index];  // Soruyu seç
+        silinenSorular.Add(selectedSoru);  // Seçilen soruyu silinen sorulara ekle
+        sorular.RemoveAt(index);  // Seçilen soruyu listeden çıkar
+        return selectedSoru;  // Seçilen soruyu geri döndür
     }
 
-    public static void SilinenleriCagir(){
-        if(silinenSorular.Count != 0){
-            for (int i = silinenSorular.Count; i>= 0; i--){
-                sorular.Add(silinenSorular[i]);
-                silinenSorular.Remove(silinenSorular[i]);
-            }
-            Debug.Log("Silinen Sorular Geri Aktarıldı.");
+
+    public static void SilinenleriCagir()
+    {
+        Debug.Log("Silineni Çağır Çalışıyor");
+
+        // Eğer silinen sorular varsa, bunları tekrar sorular listesine ekleyelim
+        while (silinenSorular.Count > 0)
+        {
+            sorular.Add(silinenSorular[0]);
+            silinenSorular.RemoveAt(0);  // İlk elemanı çıkararak ekle
         }
-        
+
+        Debug.Log("Silinen Sorular Geri Aktarıldı.");
     }
 }
+

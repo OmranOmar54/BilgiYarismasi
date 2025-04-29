@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEngine.EventSystems;
 using System.Text.RegularExpressions;
+using Unity.PlasticSCM.Editor.WebApi;
 
 public class AnaMenu : MonoBehaviour
 {
@@ -24,6 +25,12 @@ public class AnaMenu : MonoBehaviour
     public GameObject klavye;
     public static string apiUrl = "https://bilgiyarismasi-api.onrender.com";
 
+    [Header("Admin Bilgileri")]
+    public GameObject adminSifrePaneli;
+    public TMP_InputField sifreGirisi;
+    public static bool adminMode = false;
+    
+
     public static bool KullaniciAdiUygunMu(string input){
         if (string.IsNullOrEmpty(input)){
             return false;
@@ -35,37 +42,43 @@ public class AnaMenu : MonoBehaviour
     public void OyunaBasla() //Oyuna basla butonunda cagirilacak script
     {
         kullaniciAdi = kullaniciAdiAlani.text; //kullanici adi textini aliyor
-        if(!KullaniciAdiUygunMu(kullaniciAdi)){
-            if (!string.IsNullOrEmpty(kullaniciAdi)) //kullanici adi bos degil ise
-            {
-                if(!Regex.IsMatch(kullaniciAdi, @"[qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM]")){
-                    IDHatasi.SetActive(true);
-                    IDHatasiText.text = "Kullanıcı Adı Yalnızca Rakam veya Karakter İçeremez";
-                }
-                else{
-                    StartCoroutine(CheckUsername(kullaniciAdi));
-                    IDHatasi.SetActive(false); 
-                }
-            }
-
-            else//kullanici adi bos ise
-            {
-                IDHatasi.SetActive(true);
-                IDHatasiText.text = "Kullanıcı Adı Boş Bırakılamaz";
-
-            }
+        if(kullaniciAdi == "admin")
+        {
+            adminSifrePaneli.SetActive(true);
+            
         }
         else{
-            Debug.LogError("Kullanıcı Adı Uygun Değil");
-            IDHatasi.SetActive(true);
-            if(Regex.IsMatch(kullaniciAdi, @"[\s]")){
-                IDHatasiText.text = "Kullanıcı Adı Boşluk Barındıramaz";
+            if(!KullaniciAdiUygunMu(kullaniciAdi)){
+                if (!string.IsNullOrEmpty(kullaniciAdi)) //kullanici adi bos degil ise
+                {
+                    if(!Regex.IsMatch(kullaniciAdi, @"[qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM]")){
+                        IDHatasi.SetActive(true);
+                        IDHatasiText.text = "Kullanıcı Adı Yalnızca Rakam veya Karakter İçeremez";
+                    }
+                    else{
+                        StartCoroutine(CheckUsername(kullaniciAdi));
+                        IDHatasi.SetActive(false); 
+                    }
+                }
+
+                else//kullanici adi bos ise
+                {
+                    IDHatasi.SetActive(true);
+                    IDHatasiText.text = "Kullanıcı Adı Boş Bırakılamaz";
+
+                }
             }
-            else if(Regex.IsMatch(kullaniciAdi, @"[çğıöşüÇĞİÖŞÜ]")){
-                IDHatasiText.text = "Kullanıcı Adı Türkçe Karakter Barındıramaz";
+            else{
+                Debug.LogError("Kullanıcı Adı Uygun Değil");
+                IDHatasi.SetActive(true);
+                if(Regex.IsMatch(kullaniciAdi, @"[\s]")){
+                    IDHatasiText.text = "Kullanıcı Adı Boşluk Barındıramaz";
+                }
+                else if(Regex.IsMatch(kullaniciAdi, @"[çğıöşüÇĞİÖŞÜ]")){
+                    IDHatasiText.text = "Kullanıcı Adı Türkçe Karakter Barındıramaz";
+                }
             }
         }
-        
     }
 
     public class UsernameToSend{
@@ -354,5 +367,24 @@ public class AnaMenu : MonoBehaviour
     public void KlavyeAcilipKapanmasi()//kullanici adi alanina tiklayinca acilan kisim
     {
         klavye.SetActive(true);
+    }
+    public void YoneticiPaneliKapat(){
+        adminSifrePaneli.SetActive(false);
+    }
+    public void YoneticiGirisYap(){
+        if(sifreGirisi.text == "545454")
+        {
+            adminMode = true;
+            adminSifrePaneli.SetActive(false);
+            AdminGirisi();
+        }
+        else{
+            IDHatasi.SetActive(true);
+            IDHatasiText.text = "Yanlış Şifre Girdiniz";
+        }
+    }
+
+    public void AdminGirisi(){
+        SceneManager.LoadScene("Oyun");
     }
 }
