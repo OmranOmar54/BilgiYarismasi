@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using SimpleJSON;
 using System.Linq;
 using JetBrains.Annotations;
+using soruVeritabani;
 
 
 public class Oyun : MonoBehaviour
@@ -64,7 +65,7 @@ public class Oyun : MonoBehaviour
     {
         adminMode = AnaMenu.adminMode;
         Debug.Log("Awake");
-        SoruVeritabani.SilinenleriCagir();  // Sahne yüklendiğinde silinen soruları geri yükle
+        SoruDatabase.SilinenleriCagir();  // Sahne yüklendiğinde silinen soruları geri yükle
     }
 
     void Start()
@@ -90,7 +91,7 @@ public class Oyun : MonoBehaviour
 
     void yeniSoruOlustur()
     {
-        rastgeleSoru = SoruVeritabani.RastgeleSoruGetir();
+        rastgeleSoru = SoruDatabase.RastgeleSoruGetir();
 
         soru.text = rastgeleSoru.soruMetni;
         a.text = rastgeleSoru.soruASikki;
@@ -320,7 +321,7 @@ public class Oyun : MonoBehaviour
 }
 
 
-public class Soru
+/*public class Soru
 {
     public int soruID;
     public string soruMetni;
@@ -339,8 +340,8 @@ public class Soru
         soruDSikki = d;
         dogruSik = dogru;
     }
-}
-public static class SoruVeritabani
+}*/
+/*public static class SoruVeritabani
 {
     private static List<Soru> sorular = new List<Soru>()
     {
@@ -383,4 +384,4 @@ public static class SoruVeritabani
         Debug.Log("Silinen Sorular Geri Aktarıldı.");
     }
 }
-
+*/
