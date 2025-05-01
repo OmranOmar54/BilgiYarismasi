@@ -10,17 +10,59 @@ public class Soru
     public string soruCSikki;
     public string soruDSikki;
     public char dogruSik;
+
     public Soru(int id, string soru, string a, string b, string c, string d, char dogru)
     {
         soruID = id;
         soruMetni = soru;
-        soruASikki = a;
-        soruBSikki = b;
-        soruCSikki = c;
-        soruDSikki = d;
-        dogruSik = dogru;
+
+        // Orijinal şıkları ve doğru cevabı liste olarak al
+        List<(string secenek, char harf)> siklar = new List<(string, char)>()
+        {
+            (a, 'A'),
+            (b, 'B'),
+            (c, 'C'),
+            (d, 'D')
+        };
+
+        // Doğru cevabın metnini bul
+        string dogruCevapMetni = dogru switch
+        {
+            'A' => a,
+            'B' => b,
+            'C' => c,
+            'D' => d,
+            _ => ""
+        };
+
+        // Şıkları karıştır
+        Shuffle(siklar);
+
+        // Karışık şıkları yeni alanlara yerleştir
+        soruASikki = siklar[0].secenek;
+        soruBSikki = siklar[1].secenek;
+        soruCSikki = siklar[2].secenek;
+        soruDSikki = siklar[3].secenek;
+
+        // Yeni doğru şıkkı belirle
+        if (siklar[0].secenek == dogruCevapMetni) dogruSik = 'A';
+        else if (siklar[1].secenek == dogruCevapMetni) dogruSik = 'B';
+        else if (siklar[2].secenek == dogruCevapMetni) dogruSik = 'C';
+        else if (siklar[3].secenek == dogruCevapMetni) dogruSik = 'D';
+    }
+
+    private void Shuffle(List<(string secenek, char harf)> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = UnityEngine.Random.Range(0, i + 1);
+            var temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
+        }
     }
 }
+
 
 namespace soruVeritabani
 {

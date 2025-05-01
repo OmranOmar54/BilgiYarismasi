@@ -384,6 +384,6 @@ public class AnaMenu : MonoBehaviour
     }
 
     public void AdminGirisi(){
-        SceneManager.LoadScene("Oyun");
+        SceneManager.LoadScene("AdminMenu");
     }
 }

@@ -18,7 +18,7 @@ public class Oyun : MonoBehaviour
     
     [Header("Oyun Zamanlayicisi")]
     public TextMeshProUGUI timerText; 
-    public int remainingTime = 60;
+    public int remainingTime = 90;
     public bool isTimerActive = false;
 
     [Header("Baslangic Mesaji")]
@@ -35,6 +35,9 @@ public class Oyun : MonoBehaviour
     public TextMeshProUGUI soruSayisiText;
 
     private int mevcutSoruSayisi = 1;
+
+    public int dogruPuani;
+    public int yanlisPuani;
 
     [Header("Kullanıcı Bilgileri")]
     public string kullaniciAdi;
@@ -121,16 +124,19 @@ public class Oyun : MonoBehaviour
             geciciUyari.SetActive(true);
             yield return new WaitForSeconds(beklenecekZaman);
             dogru += 1;
-            puan += 100 ;
+            puan += dogruPuani ;
             geciciUyari.SetActive(false);
+            StartCoroutine(UpdateScore(kullaniciAdi, puan, false, true));
+
         }
         else{
             geciciYazi.text = "Yanlış";
             geciciUyari.SetActive(true);
             yield return new WaitForSeconds(beklenecekZaman);
             yanlis += 1;
-            puan -=20;
+            puan += yanlisPuani;
             geciciUyari.SetActive(false);
+            StartCoroutine(UpdateScore(kullaniciAdi, puan, false, true));
         }
         yeniSoruOlustur();
 
@@ -166,16 +172,16 @@ public class Oyun : MonoBehaviour
     }
 
     public void SureBitti(){
-        StartCoroutine(UpdateScore(kullaniciAdi, puan, false));
+        StartCoroutine(UpdateScore(kullaniciAdi, puan, false, false));
     }
 
     public void AnaMenuyeDon()
     {
         if(!adminMode){
-            StartCoroutine(UpdateScore(kullaniciAdi, puan, true));
+            StartCoroutine(UpdateScore(kullaniciAdi, puan, true, false));
         }
         else{
-            SceneManager.LoadScene("AnaMenu");
+            SceneManager.LoadScene("AdminMenu");
         }
     }
 
@@ -218,7 +224,7 @@ public class Oyun : MonoBehaviour
         public int score;
     }
 
-    IEnumerator UpdateScore(string username, int score, bool oyunSonuMu){
+    IEnumerator UpdateScore(string username, int score, bool oyunSonuMu, bool soruArasiMi){
         GuncellenecekData yeniData = new GuncellenecekData
         {
         username = username,
@@ -261,7 +267,7 @@ public class Oyun : MonoBehaviour
                 }
                 else{
                     yield return new WaitForSeconds(0.5f);
-                    StartCoroutine(FindRank(kullaniciAdi));
+                    StartCoroutine(FindRank(kullaniciAdi, soruArasiMi));
                 }
 
             }
@@ -274,7 +280,7 @@ public class Oyun : MonoBehaviour
         public string username;
     }
 
-    IEnumerator FindRank(string username){
+    IEnumerator FindRank(string username, bool soruArasiMi){
         string findRankApiUrl = apiUrl + "/get_rank";
 
         UsernameData data = new UsernameData();
@@ -300,7 +306,7 @@ public class Oyun : MonoBehaviour
                     Debug.LogError("Sunucu Hata Yanıtı: " + request.downloadHandler.text);
                 }
             }
-            else{
+            else if(!soruArasiMi){
                 var json = JSON.Parse(request.downloadHandler.text);
                 int rank = json["rank"].AsInt;
                 siralama = rank;
@@ -308,6 +314,9 @@ public class Oyun : MonoBehaviour
                 yield return new WaitForSeconds(0.5f);
                 oyunSonuPanel.SetActive(true);
                 oyunSonuText.text = "Tebrikler " + kullaniciAdi + ", " + dogru + " doğru ve " + yanlis + " yanlış ile " + puan + " puan yapıp " + siralama +" sıraya yerleştiniz";                               
+            }
+            else{
+                yield return new WaitForSeconds(0.5f);
             }
         }
     }
@@ -319,69 +328,3 @@ public class Oyun : MonoBehaviour
         cikisMenusu.SetActive(false);
     }
 }
-
-
-/*public class Soru
-{
-    public int soruID;
-    public string soruMetni;
-    public string soruASikki;
-    public string soruBSikki;
-    public string soruCSikki;
-    public string soruDSikki;
-    public char dogruSik;
-    public Soru(int id, string soru, string a, string b, string c, string d, char dogru)
-    {
-        soruID = id;
-        soruMetni = soru;
-        soruASikki = a;
-        soruBSikki = b;
-        soruCSikki = c;
-        soruDSikki = d;
-        dogruSik = dogru;
-    }
-}*/
-/*public static class SoruVeritabani
-{
-    private static List<Soru> sorular = new List<Soru>()
-    {
-        new Soru(1, "Türkiye'nin başkenti neresidir?", "İstanbul", "Ankara", "Sakarya", "Bursa", 'B'),
-        new Soru(2, "Dünya'nın en büyük okyanusu hangisidir?", "Hint", "Atlas", "Pasifik", "Arktik", 'C'),
-        new Soru(3, "2 + 2 kaç eder?", "3", "4", "5", "6", 'B'),
-    };
-
-    private static List<Soru> silinenSorular = new List<Soru>(){
-    };
-
-    public static Soru RastgeleSoruGetir()
-    {
-        if (sorular.Count == 0)
-        {
-            // Eğer sorular listesi boşsa, silinen soruları geri çağırıyoruz
-            //SilinenleriCagir();
-            return new Soru(0, "", "", "", "", "", 's');
-        }
-
-        int index = Random.Range(0, sorular.Count);
-        Soru selectedSoru = sorular[index];  // Soruyu seç
-        silinenSorular.Add(selectedSoru);  // Seçilen soruyu silinen sorulara ekle
-        sorular.RemoveAt(index);  // Seçilen soruyu listeden çıkar
-        return selectedSoru;  // Seçilen soruyu geri döndür
-    }
-
-
-    public static void SilinenleriCagir()
-    {
-        Debug.Log("Silineni Çağır Çalışıyor");
-
-        // Eğer silinen sorular varsa, bunları tekrar sorular listesine ekleyelim
-        while (silinenSorular.Count > 0)
-        {
-            sorular.Add(silinenSorular[0]);
-            silinenSorular.RemoveAt(0);  // İlk elemanı çıkararak ekle
-        }
-
-        Debug.Log("Silinen Sorular Geri Aktarıldı.");
-    }
-}
-*/
