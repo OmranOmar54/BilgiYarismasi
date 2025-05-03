@@ -29,6 +29,8 @@ public class AnaMenu : MonoBehaviour
     public TMP_InputField sifreGirisi;
     public static bool adminMode = false;
     
+    public WebOpener webOpener;
+
 
     public static bool KullaniciAdiUygunMu(string input){
         if (string.IsNullOrEmpty(input)){
@@ -385,5 +387,9 @@ public class AnaMenu : MonoBehaviour
 
     public void AdminGirisi(){
         SceneManager.LoadScene("AdminMenu");
+    }
+
+    public void AnketAcma(){
+        webOpener.LinkiAc("https://google.com");
     }
 }

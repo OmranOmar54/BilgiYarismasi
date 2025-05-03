@@ -78,6 +78,7 @@ public class Oyun : MonoBehaviour
         if(!adminMode){
             kullaniciAdi = AnaMenu.kullaniciAdi;
             kullaniciIP = AnaMenu.kullaniciIP;
+            baslangicMesaji.SetActive(true);
             if(baslangicMesaji == null){
                 Debug.LogError("GirisPaneli Bulunamadı");
             }
