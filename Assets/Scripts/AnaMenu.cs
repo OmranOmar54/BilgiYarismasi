@@ -404,7 +404,7 @@ public class AnaMenu : MonoBehaviour
     }
 
     public void AnketAcma(){
-        webOpener.LinkiAc("https://google.com");
+        webOpener.LinkiAc("https://docs.google.com/forms/d/e/1FAIpQLSdC594OVzRdP89vqQ3PUtKm-1osfD9lnlQNWBco-Q35jPG4GQ/viewform?usp=header");
         anketSorusu.SetActive(false);
     }
     public void AnketPaneliKapama(){
