@@ -2277,7 +2277,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1562102}
         m_TargetAssemblyTypeName: AnaMenu, Assembly-CSharp
-        m_MethodName: AnketAcma
+        m_MethodName: Hakkinda
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
