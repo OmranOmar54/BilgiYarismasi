@@ -22,7 +22,11 @@ public class AnaMenu : MonoBehaviour
     public Transform leaderboardContentPanel;
     public TextMeshProUGUI leaderboardStatusText;
     public GameObject klavye;
+    public GameObject anketSorusu;
+    public static bool anketAcilacakMi = false;
+
     public static string apiUrl = "https://bilgiyarismasi-api.onrender.com";
+
 
     [Header("Admin Bilgileri")]
     public GameObject adminSifrePaneli;
@@ -32,6 +36,7 @@ public class AnaMenu : MonoBehaviour
     public WebOpener webOpener;
 
 
+
     public static bool KullaniciAdiUygunMu(string input){
         if (string.IsNullOrEmpty(input)){
             return false;
@@ -39,6 +44,15 @@ public class AnaMenu : MonoBehaviour
         return Regex.IsMatch(input, @"[çğıöşüÇĞİÖŞÜ\s]");
     }
 
+    void Awake(){
+        if(anketAcilacakMi)
+        {
+            anketSorusu.SetActive(true);
+        }
+        else{
+            anketSorusu.SetActive(false);
+        }
+    }
 
     public void OyunaBasla() //Oyuna basla butonunda cagirilacak script
     {
@@ -391,5 +405,9 @@ public class AnaMenu : MonoBehaviour
 
     public void AnketAcma(){
         webOpener.LinkiAc("https://google.com");
+        anketSorusu.SetActive(false);
+    }
+    public void AnketPaneliKapama(){
+        anketSorusu.SetActive(false);
     }
 }

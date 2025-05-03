@@ -58,6 +58,7 @@ public class Oyun : MonoBehaviour
     public GameObject geciciUyari;
     public TextMeshProUGUI geciciYazi;
     public GameObject cikisMenusu;
+    
 
     [Header("Admin Bilgileri")]
     public bool adminMode = false;
@@ -183,6 +184,8 @@ public class Oyun : MonoBehaviour
         }
         else{
             SceneManager.LoadScene("AdminMenu");
+            //AnaMenu.anketSorusu.SetActive(true);
+            AnaMenu.anketAcilacakMi = true;
         }
     }
 
@@ -265,6 +268,8 @@ public class Oyun : MonoBehaviour
                     yield return new WaitForSeconds(1f);
                     Debug.Log("Kullanıcı Sıraya Kaydedildi.");
                     SceneManager.LoadScene("AnaMenu");
+                    //AnaMenu.anketSorusu.SetActive(true);
+                    AnaMenu.anketAcilacakMi = true;
                 }
                 else{
                     yield return new WaitForSeconds(0.5f);
