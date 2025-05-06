@@ -24,9 +24,6 @@ public class AnaMenu : MonoBehaviour
     public GameObject anketSorusu;
     public static bool anketAcilacakMi = false;
 
-    public bool guncelleniyorMu;
-    public int veriyiGuncellemeAraligi = 5;
-
     public static string apiUrl = "https://bilgiyarismasi-api.onrender.com";
 
 
@@ -56,27 +53,6 @@ public class AnaMenu : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        if(!guncelleniyorMu){
-            StartCoroutine(Bekle());
-        }
-
-    }
-
-    public IEnumerator Bekle()
-    {
-        Debug.Log("Bekleniyor");
-        guncelleniyorMu = true;
-
-        // Bu çağrıyı beklemeden geçme!
-        yield return StartCoroutine(FetchLeaderboardDataCoroutine());
-
-        yield return new WaitForSeconds(veriyiGuncellemeAraligi);
-        Debug.Log("Beklendi");
-
-        guncelleniyorMu = false;
-    }
 
     public void OyunaBasla() //Oyuna basla butonunda cagirilacak script
     {
@@ -286,7 +262,7 @@ public class AnaMenu : MonoBehaviour
 
     IEnumerator FetchLeaderboardDataCoroutine()
     {
-        //ClearLeaderboardUI();//liderlik tablosu dolu ise temizle
+        ClearLeaderboardUI();//liderlik tablosu dolu ise temizle
         if (leaderboardStatusText != null) leaderboardStatusText.text = "Yükleniyor...";
 
         string fullUrl = apiUrl + "/get_leaderboard";
@@ -313,85 +289,8 @@ public class AnaMenu : MonoBehaviour
 
                 if (leaderboardStatusText != null) leaderboardStatusText.text = "";
 
-                LeaderboardEntry[] entries = JsonHelper.FromJson<LeaderboardEntry>(jsonResponse);
-
-                if (entries == null || entries.Length == 0)
-                {
-                    if (leaderboardStatusText != null) leaderboardStatusText.text = "Henüz skor kaydedilmemiş.";
-                    yield break;
-                }
-
-                // Mevcut prefabları haritaya al
-                Dictionary<string, GameObject> existingEntries = new Dictionary<string, GameObject>();
-                foreach (Transform child in leaderboardContentPanel)
-                {
-                    TextMeshProUGUI nameText = child.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
-                    if (nameText != null)
-                    {
-                        existingEntries[nameText.text] = child.gameObject;
-                    }
-                }
-
-                // Güncellenen kullanıcıları tut
-                HashSet<string> updatedUsers = new HashSet<string>();
-
-                // Her kullanıcı için prefab oluştur veya güncelle
-                foreach (var entry in entries)
-                {
-                    GameObject entryGO;
-
-                    if (existingEntries.TryGetValue(entry.username, out entryGO))
-                    {
-                        // Zaten var, sadece içeriği güncelle
-                    }
-                    else
-                    {
-                        // Yeni prefab oluştur
-                        entryGO = Instantiate(leaderboardEntryPrefab, leaderboardContentPanel);
-                    }
-
-                    // Ortak güncelleme işlemleri
-                    entryGO.name = entry.username;
-
-                    TextMeshProUGUI rankText = entryGO.transform.Find("Rank")?.GetComponent<TextMeshProUGUI>();
-                    TextMeshProUGUI nameText = entryGO.transform.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
-                    TextMeshProUGUI scoreText = entryGO.transform.Find("Puan")?.GetComponent<TextMeshProUGUI>();
-
-                    if (rankText != null) rankText.text = entry.rank.ToString() + ".";
-                    if (nameText != null) nameText.text = entry.username;
-                    if (scoreText != null) scoreText.text = entry.score.ToString();
-
-                    updatedUsers.Add(entry.username);
-                }
-
-                // Artık olmayan kullanıcıların prefablarını sil
-                foreach (Transform child in leaderboardContentPanel)
-                {
-                    TextMeshProUGUI nameText = child.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
-                    if (nameText != null && !updatedUsers.Contains(nameText.text))
-                    {
-                        Destroy(child.gameObject);
-                    }
-                }
-
-                // Rank'a göre sırala
-                List<Transform> sortedChildren = new List<Transform>();
-                foreach (Transform child in leaderboardContentPanel)
-                {
-                    sortedChildren.Add(child);
-                }
-
-                sortedChildren.Sort((a, b) =>
-                {
-                    var aRank = int.Parse(a.Find("Rank")?.GetComponent<TextMeshProUGUI>().text.Replace(".", "") ?? "9999");
-                    var bRank = int.Parse(b.Find("Rank")?.GetComponent<TextMeshProUGUI>().text.Replace(".", "") ?? "9999");
-                    return aRank.CompareTo(bRank);
-                });
-
-                for (int i = 0; i < sortedChildren.Count; i++)
-                {
-                    sortedChildren[i].SetSiblingIndex(i);
-                }            }
+                ProcessLeaderboardJson(jsonResponse);                
+            }
         }
     }
 
