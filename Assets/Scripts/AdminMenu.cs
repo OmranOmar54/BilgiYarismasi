@@ -8,6 +8,10 @@ using UnityEngine.Networking;
 using UnityEngine.EventSystems;
 using System.Text.RegularExpressions;
 using System;
+using System.Linq;
+using UnityEditor.SearchService;
+using JetBrains.Annotations;
+using System.Collections.Generic;
 
 
 
@@ -18,10 +22,19 @@ public class AdminMenu : MonoBehaviour
     public Transform leaderboardContentPanel;
     public TextMeshProUGUI leaderboardStatusText;
 
+    //kapanıp açılacaklar
+    public GameObject[] kapanacaklar;
+
+    //açılacaklar
+    public GameObject[] acilacaklar;
+
     public bool otoGuncelleme;
     public static bool guncelleniyorMu;
 
     public TMP_InputField guncellemeSikligi;
+
+    public Transform fullscreenContent;
+    public TextMeshProUGUI fullscreenStatusText;
 
     public GameObject ayarlar;
 
@@ -31,7 +44,8 @@ public class AdminMenu : MonoBehaviour
     void Start()
     {
         apiUrl = AnaMenu.apiUrl;
-        StartCoroutine(TabloyuCek());
+        StartCoroutine(TabloyuCek(leaderboardStatusText,leaderboardContentPanel));
+        StartCoroutine(TabloyuCek(fullscreenStatusText, fullscreenContent));
 
     }
 
@@ -62,15 +76,19 @@ public class AdminMenu : MonoBehaviour
     {
         Debug.Log("Bekleniyor");
         guncelleniyorMu = true;
-        StartCoroutine(TabloyuCek());
+
+        // Bu çağrıyı beklemeden geçme!
+        yield return StartCoroutine(TabloyuCek(leaderboardStatusText, leaderboardContentPanel));
+
         yield return new WaitForSeconds(veriyiGuncellemeAraligi);
         Debug.Log("Beklendi");
+
         guncelleniyorMu = false;
     }
 
-    public IEnumerator TabloyuCek(){
-        ClearLeaderboardUI();//liderlik tablosu dolu ise temizle
-        if (leaderboardStatusText != null) leaderboardStatusText.text = "Yükleniyor...";
+    public IEnumerator TabloyuCek(TextMeshProUGUI statusText, Transform contentPanel)
+    {
+        if (statusText != null) statusText.text = "Yükleniyor...";
 
         string fullUrl = apiUrl + "/get_leaderboard";
         Debug.Log("Liderlik tablosu isteniyor: " + fullUrl);
@@ -79,33 +97,112 @@ public class AdminMenu : MonoBehaviour
         {
             yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)//gelen data hata iceriyorsa
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
             {
                 Debug.LogError($"API Okuma Hatası ({fullUrl}): {request.error}");
                 if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
                 {
                     Debug.LogError("Sunucu Hata Yanıtı: " + request.downloadHandler.text);
                 }
-                if (leaderboardStatusText != null) leaderboardStatusText.text = "Liderlik Tablosu yüklenemedi!\n(Hata: " + request.error + ")";
+                if (statusText != null) statusText.text = "Liderlik Tablosu yüklenemedi!\n(Hata: " + request.error + ")";
             }
-            else if (request.result == UnityWebRequest.Result.Success)//hata icermiyorsa
+            else if (request.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log("Liderlik tablosu başarıyla alındı!");
                 string jsonResponse = request.downloadHandler.text;
                 Debug.Log("Sunucu Yanıtı (JSON): " + jsonResponse);
 
-                if (leaderboardStatusText != null) leaderboardStatusText.text = "";
+                if (statusText != null) statusText.text = "";
 
-                DatayiIsleme(jsonResponse);//gelen datayi isleme sureci
+                // === Veriyi İşleme ===
+                LeaderboardEntry[] entries = JsonHelper.FromJson<LeaderboardEntry>(jsonResponse);
+
+                if (entries == null || entries.Length == 0)
+                {
+                    if (statusText != null) statusText.text = "Henüz skor kaydedilmemiş.";
+                    yield break;
+                }
+
+                // Mevcut prefabları haritaya al
+                Dictionary<string, GameObject> existingEntries = new Dictionary<string, GameObject>();
+                foreach (Transform child in contentPanel)
+                {
+                    TextMeshProUGUI nameText = child.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
+                    if (nameText != null)
+                    {
+                        existingEntries[nameText.text] = child.gameObject;
+                    }
+                }
+
+                // Güncellenen kullanıcıları tut
+                HashSet<string> updatedUsers = new HashSet<string>();
+
+                // Her kullanıcı için prefab oluştur veya güncelle
+                foreach (var entry in entries)
+                {
+                    GameObject entryGO;
+
+                    if (existingEntries.TryGetValue(entry.username, out entryGO))
+                    {
+                        // Zaten var, sadece içeriği güncelle
+                    }
+                    else
+                    {
+                        // Yeni prefab oluştur
+                        entryGO = Instantiate(leaderboardEntryPrefab, contentPanel);
+                    }
+
+                    // Ortak güncelleme işlemleri
+                    entryGO.name = entry.username;
+
+                    TextMeshProUGUI rankText = entryGO.transform.Find("Rank")?.GetComponent<TextMeshProUGUI>();
+                    TextMeshProUGUI nameText = entryGO.transform.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
+                    TextMeshProUGUI scoreText = entryGO.transform.Find("Puan")?.GetComponent<TextMeshProUGUI>();
+
+                    if (rankText != null) rankText.text = entry.rank.ToString() + ".";
+                    if (nameText != null) nameText.text = entry.username;
+                    if (scoreText != null) scoreText.text = entry.score.ToString();
+
+                    updatedUsers.Add(entry.username);
+                }
+
+                // Artık olmayan kullanıcıların prefablarını sil
+                foreach (Transform child in contentPanel)
+                {
+                    TextMeshProUGUI nameText = child.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
+                    if (nameText != null && !updatedUsers.Contains(nameText.text))
+                    {
+                        Destroy(child.gameObject);
+                    }
+                }
+
+                // Rank'a göre sırala
+                List<Transform> sortedChildren = new List<Transform>();
+                foreach (Transform child in contentPanel)
+                {
+                    sortedChildren.Add(child);
+                }
+
+                sortedChildren.Sort((a, b) =>
+                {
+                    var aRank = int.Parse(a.Find("Rank")?.GetComponent<TextMeshProUGUI>().text.Replace(".", "") ?? "9999");
+                    var bRank = int.Parse(b.Find("Rank")?.GetComponent<TextMeshProUGUI>().text.Replace(".", "") ?? "9999");
+                    return aRank.CompareTo(bRank);
+                });
+
+                for (int i = 0; i < sortedChildren.Count; i++)
+                {
+                    sortedChildren[i].SetSiblingIndex(i);
+                }
             }
         }
     }
 
-    void ClearLeaderboardUI()//liderlik tablosu temizleme
+    void ClearLeaderboardUI(Transform contentPanel)//liderlik tablosu temizleme
     {
-        if (leaderboardContentPanel == null) return;
+        if (contentPanel == null) return;
 
-        foreach (Transform child in leaderboardContentPanel)
+        foreach (Transform child in contentPanel)
         {
             Destroy(child.gameObject);
         }
@@ -136,11 +233,12 @@ public class AdminMenu : MonoBehaviour
     }
 
 
-    void DatayiIsleme(string json){
-        if (string.IsNullOrEmpty(json))//json verisi bos mu
+    void DatayiIsleme(string json, TextMeshProUGUI statusText, Transform contentPanel)
+    {
+        if (string.IsNullOrEmpty(json))
         {
             Debug.LogError("Alınan JSON verisi boş.");
-            if (leaderboardStatusText != null) leaderboardStatusText.text = "Liderlik tablosu boş veya alınamadı.";
+            if (statusText != null) statusText.text = "Liderlik tablosu boş veya alınamadı.";
             return;
         }
 
@@ -150,58 +248,91 @@ public class AdminMenu : MonoBehaviour
 
             if (entries == null || entries.Length == 0)
             {
-                 Debug.LogWarning("Liderlik tablosunda gösterilecek veri yok.");
-                 if (leaderboardStatusText != null) leaderboardStatusText.text = "Henüz skor kaydedilmemiş.";
-                 return;
-            }
-
-            if (leaderboardEntryPrefab == null || leaderboardContentPanel == null)
-            {
-                Debug.LogError("Leaderboard Entry Prefab veya Content Panel atanmamış!");
-                if (leaderboardStatusText != null) leaderboardStatusText.text = "UI Ayarları Eksik!";
+                if (statusText != null) statusText.text = "Henüz skor kaydedilmemiş.";
                 return;
             }
 
+            if (leaderboardEntryPrefab == null || contentPanel == null)
+            {
+                Debug.LogError("Leaderboard Entry Prefab veya Content Panel atanmamış!");
+                if (statusText != null) statusText.text = "UI Ayarları Eksik!";
+                return;
+            }
+
+            Dictionary<string, GameObject> existingEntries = new Dictionary<string, GameObject>();
+
+            // Mevcut prefabları topla (username -> GameObject)
+            foreach (Transform child in contentPanel)
+            {
+                TextMeshProUGUI nameText = child.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
+                if (nameText != null)
+                {
+                    existingEntries[nameText.text] = child.gameObject;
+                }
+            }
+
+            // Ekranda kalacak olan prefabları takip et
+            HashSet<string> updatedUsers = new HashSet<string>();
+
             foreach (var entry in entries)
             {
-                GameObject entryGO = Instantiate(leaderboardEntryPrefab, leaderboardContentPanel);//gelen verilere gore prefab ekleme
+                GameObject entryGO;
 
+                if (existingEntries.TryGetValue(entry.username, out entryGO))
+                {
+                    // Güncelle
+                }
+                else
+                {
+                    // Yeni oluştur
+                    entryGO = Instantiate(leaderboardEntryPrefab, contentPanel);
+                }
+
+                // Güncelleme işlemi
+                entryGO.name = entry.username; // debug kolaylığı
                 TextMeshProUGUI rankText = entryGO.transform.Find("Rank")?.GetComponent<TextMeshProUGUI>();
                 TextMeshProUGUI nameText = entryGO.transform.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
                 TextMeshProUGUI scoreText = entryGO.transform.Find("Puan")?.GetComponent<TextMeshProUGUI>();
 
-                if (rankText != null)
-                {
-                    rankText.text = entry.rank.ToString() + ".";
-                } 
-                else 
-                {
-                    Debug.LogWarning($"Prefab '{leaderboardEntryPrefab.name}' içinde 'RankText' isimli TMP UGUI objesi bulunamadı.");
-                }
+                if (rankText != null) rankText.text = entry.rank.ToString() + ".";
+                if (nameText != null) nameText.text = entry.username;
+                if (scoreText != null) scoreText.text = entry.score.ToString();
 
-                if (nameText != null)
-                {
-                    nameText.text = entry.username;
-                }
-                else 
-                {
-                     Debug.LogWarning($"Prefab '{leaderboardEntryPrefab.name}' içinde 'NameText' isimli TMP UGUI objesi bulunamadı.");
-                }
+                updatedUsers.Add(entry.username);
+            }
 
-                if (scoreText != null)
+            // Silinmesi gereken eski prefablar
+            foreach (Transform child in contentPanel)
+            {
+                TextMeshProUGUI nameText = child.Find("KullaniciAdi")?.GetComponent<TextMeshProUGUI>();
+                if (nameText != null && !updatedUsers.Contains(nameText.text))
                 {
-                    scoreText.text = entry.score.ToString();
-                } 
-                else 
-                {
-                     Debug.LogWarning($"Prefab '{leaderboardEntryPrefab.name}' içinde 'ScoreText' isimli TMP UGUI objesi bulunamadı.");
+                    Destroy(child.gameObject);
                 }
+            }
+
+            // Yeniden sıralama (rank'a göre)
+            List<Transform> sortedChildren = new List<Transform>();
+            foreach (Transform child in contentPanel)
+            {
+                sortedChildren.Add(child);
+            }
+
+            sortedChildren.Sort((a, b) => {
+                var aRank = int.Parse(a.Find("Rank")?.GetComponent<TextMeshProUGUI>().text.Replace(".", "") ?? "9999");
+                var bRank = int.Parse(b.Find("Rank")?.GetComponent<TextMeshProUGUI>().text.Replace(".", "") ?? "9999");
+                return aRank.CompareTo(bRank);
+            });
+
+            for (int i = 0; i < sortedChildren.Count; i++)
+            {
+                sortedChildren[i].SetSiblingIndex(i);
             }
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"JSON işlenirken veya UI güncellenirken hata oluştu: {e.Message}\nStackTrace: {e.StackTrace}\nGelen JSON: {json}");
-            if (leaderboardStatusText != null) leaderboardStatusText.text = "Veri işlenirken bir hata oluştu.";
+            Debug.LogError($"JSON işlenirken hata oluştu: {e.Message}");
+            if (statusText != null) statusText.text = "Veri işlenirken hata oluştu.";
         }
     }
 
@@ -218,6 +349,35 @@ public class AdminMenu : MonoBehaviour
     }
 
     public void Yenile(){
-        StartCoroutine(TabloyuCek());
+        StartCoroutine(TabloyuCek(leaderboardStatusText, leaderboardContentPanel));
+    }
+    public void FullscreenYenile(){
+        StartCoroutine(TabloyuCek(fullscreenStatusText, fullscreenContent));
+
+    }
+
+    public void TamEkran(){
+        foreach (GameObject _kapanacak in kapanacaklar){
+            if (_kapanacak != null){
+                _kapanacak.SetActive(false);
+            }
+        }
+        foreach (GameObject _acilacak in acilacaklar){
+            if(_acilacak != null){
+                _acilacak.SetActive(true);
+            }
+        }
+    }
+    public void ExitFullscreen(){
+        foreach (GameObject _kapanacak in kapanacaklar){
+            if (_kapanacak != null){
+                _kapanacak.SetActive(true);
+            }
+        }
+        foreach (GameObject _acilacak in acilacaklar){
+            if(_acilacak != null){
+                _acilacak.SetActive(false);
+            }
+        }
     }
 }
