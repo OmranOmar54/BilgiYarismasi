@@ -3,12 +3,10 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using UnityEngine.Networking;
-using UnityEngine.EventSystems;
 using System.Text.RegularExpressions;
-using UnityEditor;
 using System.Collections.Generic;
+
 public class AnaMenu : MonoBehaviour
 {
     public GameObject hakkindaMenusu;

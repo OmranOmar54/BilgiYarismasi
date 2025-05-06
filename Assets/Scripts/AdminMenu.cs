@@ -1,19 +1,9 @@
 using System.Collections;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using UnityEngine.Networking;
-using UnityEngine.EventSystems;
-using System.Text.RegularExpressions;
-using System;
-using System.Linq;
-using UnityEditor.SearchService;
-using JetBrains.Annotations;
 using System.Collections.Generic;
-
-
 
 public class AdminMenu : MonoBehaviour
 {
