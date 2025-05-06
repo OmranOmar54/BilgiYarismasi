@@ -400,7 +400,7 @@ public class AnaMenu : MonoBehaviour
     }
 
     public void AdminGirisi(){
-        SceneManager.LoadScene("AdminMenu");
+        SceneManager.LoadScene("Oyun");
     }
 
     public void AnketAcma(){

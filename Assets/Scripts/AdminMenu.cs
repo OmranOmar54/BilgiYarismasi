@@ -40,11 +40,11 @@ public class AdminMenu : MonoBehaviour
     }
 
     public void CikisYap(){
-        SceneManager.LoadScene("AnaMenu");
+        //SceneManager.LoadScene("AnaMenu");
     }
 
     public void TestEt(){
-        SceneManager.LoadScene("Oyun");
+        //SceneManager.LoadScene("Oyun");
     }
 
     void Awake()

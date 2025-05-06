@@ -183,7 +183,7 @@ public class Oyun : MonoBehaviour
             StartCoroutine(UpdateScore(kullaniciAdi, puan, true, false));
         }
         else{
-            SceneManager.LoadScene("AdminMenu");
+            SceneManager.LoadScene("AnaMenu");
             //AnaMenu.anketSorusu.SetActive(true);
             AnaMenu.anketAcilacakMi = true;
         }
