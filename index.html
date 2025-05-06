@@ -56,12 +56,21 @@
         updateBannerVisibility();
       }
 
+      fullscreenButton.onclick = () => {
+        unityInstance.SetFullscreen(1);
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("portrait").catch(function(error) {
+            console.warn("Ekran yönü kilitlenemedi:", error);
+          });
+        }
+      };
+
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/17.04.2025.loader.js";
+      var loaderUrl = buildUrl + "/deneme.loader.js";
       var config = {
-        dataUrl: buildUrl + "/17.04.2025.data",
-        frameworkUrl: buildUrl + "/17.04.2025.framework.js",
-        codeUrl: buildUrl + "/17.04.2025.wasm",
+        dataUrl: buildUrl + "/deneme.data",
+        frameworkUrl: buildUrl + "/deneme.framework.js",
+        codeUrl: buildUrl + "/deneme.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "OmranOmar",
         productName: "Bilgi Yarışması",
